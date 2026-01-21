@@ -132,7 +132,7 @@ export const collections: Collection[] = [
     id: 'Bike',
     name: 'The Journey',
     description: 'Machines and open roads.',
-    coverImage: '/assets/Bike/3.jpg',
+    coverImage: '/assets/bike/3.jpg',
     photoCount: CATEGORY_CONFIG.Bike,
   },
   // Add others if needed...
