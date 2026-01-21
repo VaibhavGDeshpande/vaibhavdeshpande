@@ -22,7 +22,7 @@ const PUNE_SUBFOLDERS = {
 // --- 2. TYPES ---
 export type Category = 
   | 'Animals' | 'Bike' | 'Fort' | 'Moon' 
-  | 'Pune Grand Tour' | 'Sky' | 'Space' | 'Sun' | 'Nature';
+  | 'Pune Grand Tour' | 'Sky' | 'Space' | 'Sun' | 'Nature' |'animals'|'bike';
 
 export interface Photo {
   id: string;

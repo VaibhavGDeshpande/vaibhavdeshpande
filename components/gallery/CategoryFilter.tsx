@@ -14,8 +14,8 @@ interface CategoryFilterProps {
 // 3. Update the list to match your exact folder names from data.ts
 const categories: { value: FilterCategory; label: string }[] = [
   { value: 'All', label: 'All' },
-  { value: 'Animals', label: 'Animals' },
-  { value: 'Bike', label: 'Bike' },
+  { value: 'animals', label: 'Animals' },
+  { value: 'bike', label: 'Bike' },
   { value: 'Fort', label: 'Fort' },
   { value: 'Moon', label: 'Moon' },
   { value: 'Pune Grand Tour', label: 'Pune Grand Tour' },
