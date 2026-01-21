@@ -3,20 +3,20 @@
 // --- 1. CONFIGURATION ---
 // You can keep your folder counts here if you use the generator for the gallery
 const CATEGORY_CONFIG = {
-  Animals: 10,
-  Bike: 5,
-  Fort: 8,
+  Animals: 6,
+  Bike: 14,
+  Fort: 9,
   Moon: 6,
-  Sky: 7,
-  Space: 4,
-  Sun: 3,
+  Sky: 21,
+  Space: 6,
+  Sun: 5,
 };
 
 const PUNE_SUBFOLDERS = {
   faces: 5,
-  motion: 4,
-  normal: 10,
-  opening: 3,
+  motion: 6,
+  normal: 21,
+  opening: 4,
 };
 
 // --- 2. TYPES ---
@@ -104,7 +104,7 @@ export const collections: Collection[] = [
     id: 'Animals',
     name: 'Wildlife',
     description: 'Silent observers in the wild.',
-    coverImage: '/assets/Animals/3.jpg',
+    coverImage: '/assets/animals/3.jpg',
     photoCount: CATEGORY_CONFIG.Animals,
   },
   {
