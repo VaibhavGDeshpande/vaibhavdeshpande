@@ -1,12 +1,8 @@
-// lib/data.ts
-
-// --- 1. CONFIGURATION ---
-// You can keep your folder counts here if you use the generator for the gallery
 const CATEGORY_CONFIG = {
   Animals: 6,
   Bike: 14,
   Fort: 9,
-  Moon: 6,
+  Moon: 12,
   Sky: 21,
   Space: 6,
   Sun: 5,

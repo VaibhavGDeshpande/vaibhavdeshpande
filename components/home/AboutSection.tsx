@@ -13,7 +13,7 @@ export default function AboutSection() {
             {/* Image Container with "Film Frame" border effect */}
             <div className="relative aspect-4/5 overflow-hidden bg-neutral-900 grayscale group-hover:grayscale-0 transition-all duration-1000 ease-out">
               <Image
-                // ⚠️ Ensure this path points to your profile picture
+
                 src="/assets/Sun/1.jpg" 
                 alt="Vaibhav Deshpande"
                 fill
