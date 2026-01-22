@@ -22,50 +22,69 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ease-out
-        bg-white border-b border-white/10
-        ${scrolled ? 'h-16' : 'h-15'}
+      className={`
+        fixed top-0 inset-x-0 z-50
+        transition-all duration-500 ease-out
+        ${
+          scrolled
+            ? 'bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800'
+            : 'bg-transparent'
+        }
       `}
     >
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between mt-1">
+      <div className="max-w-7xl mx-auto px-2 h-14 flex items-center justify-between ">
+        
         {/* Logo */}
-        <Link href="/" className="flex items-center">
+        <Link href="/" className="relative flex items-center">
           <Image
-            src="/assets/name.png"
+            src="/assets/name1.png"
             alt="Vaibhav Deshpande"
-            width={scrolled ? 120 : 250}
-            height={scrolled ? 80 : 100}
-            className="transition-all duration-500"
+            width={250}
+            height={50}
             priority
+            className={`
+              transition-all duration-500 mt-3 pr-4
+              ${scrolled ? 'opacity-90 scale-[0.9]' : 'opacity-100 scale-100'}
+            `}
           />
         </Link>
 
         {/* Navigation */}
         <nav className="flex items-center gap-10 md:gap-14">
           {navLinks.map((link) => {
-            const isActive = pathname === link.href;
+            const isActive =
+              pathname === link.href ||
+              (link.href === '/gallery' && pathname.startsWith('/gallery'));
 
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`group relative text-[11px] uppercase tracking-[0.35em] transition-colors duration-300
+                className={`
+                  group relative
+                  text-[10px] md:text-[11px]
+                  uppercase tracking-[0.35em]
+                  transition-colors duration-300
                   ${
                     isActive
                       ? 'text-neutral-100'
-                      : 'text-neutral-400 hover:text-neutral-100'
-                  }`}
+                      : 'text-neutral-400 hover:text-neutral-200'
+                  }
+                `}
               >
-                <span>{link.name}</span>
+                {link.name}
 
-                {/* Underline */}
+                {/* Editorial underline */}
                 <span
-                  className={`absolute left-0 -bottom-2 h-px bg-neutral-100 transition-all duration-300
+                  className={`
+                    absolute left-0 -bottom-2 h-px bg-neutral-100
+                    transition-all duration-500 ease-out
                     ${
                       isActive
                         ? 'w-full opacity-100'
                         : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-                    }`}
+                    }
+                  `}
                 />
               </Link>
             );

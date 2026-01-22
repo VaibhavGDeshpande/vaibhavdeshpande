@@ -22,7 +22,7 @@ const PUNE_SUBFOLDERS = {
 // --- 2. TYPES ---
 export type Category = 
   | 'Animals' | 'Bike' | 'Fort' | 'Moon' 
-  | 'Pune Grand Tour' | 'Sky' | 'Space' | 'Sun' | 'Nature' |'animals'|'bike';
+  | 'Pune Grand Tour' | 'Sky' | 'Space' | 'Sun' | 'Nature' ;
 
 export interface Photo {
   id: string;
@@ -104,7 +104,7 @@ export const collections: Collection[] = [
     id: 'Animals',
     name: 'Wildlife',
     description: 'Silent observers in the wild.',
-    coverImage: '/assets/animals/3.jpg',
+    coverImage: '/assets/Animals/3.jpg',
     photoCount: CATEGORY_CONFIG.Animals,
   },
   {
@@ -132,7 +132,7 @@ export const collections: Collection[] = [
     id: 'Bike',
     name: 'The Journey',
     description: 'Machines and open roads.',
-    coverImage: '/assets/bike/3.jpg',
+    coverImage: '/assets/Bike/3.jpg',
     photoCount: CATEGORY_CONFIG.Bike,
   },
   // Add others if needed...

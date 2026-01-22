@@ -69,7 +69,7 @@ export default function AboutSection() {
               </div>
               <div>
                 <h4 className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-2">Contact</h4>
-                <a href="mailto:hello@vaibhav.com" className="font-serif text-neutral-300 text-lg hover:text-white transition-colors decoration-neutral-700 underline underline-offset-4 decoration-1">
+                <a href="mailto:deshpande.vaibhav1012@gmail.com" className="font-serif text-neutral-300 text-lg hover:text-white transition-colors decoration-neutral-700 underline underline-offset-4 decoration-1">
                   Get in Touch
                 </a>
               </div>

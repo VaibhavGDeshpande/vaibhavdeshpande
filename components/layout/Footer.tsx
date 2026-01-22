@@ -23,7 +23,7 @@ export default function Footer() {
             </div>
             <div className="flex flex-col gap-4">
               <span className="text-neutral-600 mb-2">Contact</span>
-              <a href="mailto:hello@vaibhav.com" className="hover:text-white transition-colors">Email</a>
+              <a href="mailto:deshpande.vaibhav1012@gmail.com" className="hover:text-white transition-colors">Email</a>
               <a href="#" className="hover:text-white transition-colors">Inquiries</a>
             </div>
           </div>
