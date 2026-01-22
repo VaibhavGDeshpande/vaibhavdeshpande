@@ -100,7 +100,7 @@ export const collections: Collection[] = [
     id: 'Animals',
     name: 'Wildlife',
     description: 'Silent observers in the wild.',
-    coverImage: '/assets/Animals/3.JPG',
+    coverImage: '/assets/Animals/3.jpg',
     photoCount: CATEGORY_CONFIG.Animals,
   },
   {
