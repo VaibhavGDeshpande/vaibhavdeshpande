@@ -37,7 +37,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="relative flex items-center">
           <Image
-            src="/assets/name1.png"
+            src="/name1.png"
             alt="Vaibhav Deshpande"
             width={250}
             height={50}
