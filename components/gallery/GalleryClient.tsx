@@ -3,11 +3,15 @@
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { photos, Photo } from '@/lib/data';
+import { Photo } from '@/lib/data';
 import Lightbox from '@/components/gallery/Lightbox';
 import CategoryFilter, { FilterCategory } from '@/components/gallery/CategoryFilter';
 
-export default function GalleryClient() {
+interface GalleryClientProps {
+  photos: Photo[];
+}
+
+export default function GalleryClient({ photos }: GalleryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -64,8 +68,8 @@ export default function GalleryClient() {
           >
             <div className="relative aspect-3/4 overflow-hidden bg-neutral-900">
               <Image
-                src={photo.src}
-                alt={photo.alt}
+                src={photo.image_url}
+                alt={photo.title}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />

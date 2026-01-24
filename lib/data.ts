@@ -1,4 +1,5 @@
-const CATEGORY_CONFIG = {
+import supabase from './supabase';
+export const CATEGORY_CONFIG = {
   Animals: 6,
   Bike: 14,
   Fort: 9,
@@ -8,27 +9,31 @@ const CATEGORY_CONFIG = {
   Sun: 5,
 };
 
-const PUNE_SUBFOLDERS = {
+export const PUNE_SUBFOLDERS = {
   faces: 5,
   motion: 6,
   normal: 21,
   opening: 4,
 };
 
-// --- 2. TYPES ---
-export type Category = 
-  | 'Animals' | 'Bike' | 'Fort' | 'Moon' 
-  | 'Pune Grand Tour' | 'Sky' | 'Space' | 'Sun' | 'Nature' ;
+
+
+export type Category =
+  | 'Animals'
+  | 'Bike'
+  | 'Fort'
+  | 'Moon'
+  | 'Pune Grand Tour'
+  | 'Sky'
+  | 'Space'
+  | 'Sun'
+  | 'Nature';
 
 export interface Photo {
-  id: string;
-  src: string;
-  alt: string;
-  category: Category;
+  id: null | undefined;
   title: string;
-  year: string;
-  width: number;
-  height: number;
+  category: Category;
+  image_url: string;
 }
 
 export interface Collection {
@@ -39,138 +44,58 @@ export interface Collection {
   photoCount: number;
 }
 
-export const heroImages: Photo[] = [
-  {
-    id: 'hero-1',
-    src: '/assets/PuneGrandTour/motion/1.jpg',
-    alt: 'Pune Portrait',
-    category: 'Pune Grand Tour', 
-    title: 'The Observer',
-    year: '2024',
-    width: 1200,  // Portrait example
-    height: 800,
-  },
-  {
-    id: 'hero-2',
-    src: '/assets/Moon/2.jpg',
-    alt: 'Lunar Details',
-    category: 'Moon',
-    title: 'Silence in Space',
-    year: '2024',
-    width: 1200, // Square/Portrait example
-    height: 800, 
-  },
-  {
-    id: 'hero-3',
-    src: '/assets/Fort/3.jpg',
-    alt: 'Fort Walls',
-    category: 'Nature',
-    title: 'High Ranges',
-    year: '2023',
-    width: 1200, // Landscape example
-    height: 800,
+
+
+const STORAGE_BASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL +
+  '/storage/v1/object/public/photos/';
+
+
+
+export async function getPhotos(): Promise<Photo[]> {
+  const { data, error } = await supabase
+    .from('photos')
+    .select('id, title, category, image_url');
+
+  if (error || !data) {
+    console.error('Supabase error:', error);
+    return [];
   }
-];
 
-// --- 4. COLLECTIONS (For Preview) ---
-export const collections: Collection[] = [
-  {
-    id: 'Pune Grand Tour',
-    name: 'Pune Grand Tour',
-    description: 'A visual narrative of city life, faces, and motion.',
-    coverImage: '/assets/PuneGrandTour/normal/18.jpg',
-    // Calculates total from all subfolders (5 + 4 + 10 + 3 = 22)
-    photoCount: Object.values(PUNE_SUBFOLDERS).reduce((a, b) => a + b, 0),
-  },
-  {
-    id: 'Moon',
-    name: 'Moon',
-    description: 'Phases and craters in high contrast.',
-    coverImage: '/assets/Moon/1.jpg',
-    photoCount: CATEGORY_CONFIG.Moon,
-  },
-  {
-    id: 'Fort',
-    name: 'Forts',
-    description: 'Ancient stone sentinels against the sky.',
-    coverImage: '/assets/Fort/1.jpg',
-    photoCount: CATEGORY_CONFIG.Fort,
-  },
-  {
-    id: 'Animals',
-    name: 'Wildlife',
-    description: 'Silent observers in the wild.',
-    coverImage: '/assets/Animals/3.jpg',
-    photoCount: CATEGORY_CONFIG.Animals,
-  },
-  {
-    id: 'Sky',
-    name: 'Sky & Horizons',
-    description: 'Gradients of dawn and dusk.',
-    coverImage: '/assets/Sky/7.jpg',
-    photoCount: CATEGORY_CONFIG.Sky,
-  },
-  {
-    id: 'Space',
-    name: 'Deep Space',
-    description: 'The vastness beyond our atmosphere.',
-    coverImage: '/assets/Space/1.jpg',
-    photoCount: CATEGORY_CONFIG.Space,
-  },
-  {
-    id: 'Sun',
-    name: 'Solar',
-    description: 'Light, flares, and heat.',
-    coverImage: '/assets/Sun/1.jpg',
-    photoCount: CATEGORY_CONFIG.Sun,
-  },
-  {
-    id: 'Bike',
-    name: 'The Journey',
-    description: 'Machines and open roads.',
-    coverImage: '/assets/Bike/3.jpg',
-    photoCount: CATEGORY_CONFIG.Bike,
-  },
-  // Add others if needed...
-];
+  return data.map((row) => ({
+    id:row.id,
+    title: row.title,
+    category: row.category as Category,
+    image_url: `${STORAGE_BASE_URL}${row.image_url}`,
+  }));
+}
 
-// --- 5. AUTOMATIC PHOTO GENERATOR (For Gallery Page) ---
-const generatePhotos = (): Photo[] => {
-  const allPhotos: Photo[] = [];
 
-  // A. Standard Categories
-  Object.entries(CATEGORY_CONFIG).forEach(([catName, count]) => {
-    for (let i = 1; i <= count; i++) {
-      allPhotos.push({
-        id: `${catName.toLowerCase()}-${i}`,
-        src: `/assets/${catName}/${i}.jpg`,
-        alt: `${catName} photo ${i}`,
-        title: `${catName} ${i}`,
-        category: catName as Category,
-        year: '2024',
-        width: 1200,
-        height: 800,
-      });
-    }
-  });
+export async function getHeroImages(): Promise<Photo[]> {
+  const photos = await getPhotos();
 
-  // B. Pune Grand Tour Subfolders
-  Object.entries(PUNE_SUBFOLDERS).forEach(([subfolder, count]) => {
-    for (let i = 1; i <= count; i++) {
-      allPhotos.push({
-        id: `pune-${subfolder}-${i}`,
-        src: `/assets/PuneGrandTour/${subfolder}/${i}.jpg`,
-        alt: `Pune ${subfolder} photo ${i}`,
-        title: `Pune: ${subfolder.charAt(0).toUpperCase() + subfolder.slice(1)}`,
-        category: 'Pune Grand Tour',
-        year: '2023',
-        width: 1200,
-        height: 800,
-      });
-    }
-  });
+  return [
+    photos.find((p) => p.category === 'Pune Grand Tour'),
+    photos.find((p) => p.category === 'Moon'),
+    photos.find((p) => p.category === 'Fort'),
+  ].filter(Boolean) as Photo[];
+}
 
-  return allPhotos;
-};
 
-export const photos = generatePhotos();
+export async function getCollections(): Promise<Collection[]> {
+  const photos = await getPhotos();
+
+  const grouped = photos.reduce<Record<string, Photo[]>>((acc, photo) => {
+    acc[photo.category] ??= [];
+    acc[photo.category].push(photo);
+    return acc;
+  }, {});
+
+  return Object.entries(grouped).map(([category, items]) => ({
+    id: category,
+    name: category,
+    description: `A curated collection of ${category}`,
+    coverImage: items[0].image_url,
+    photoCount: items.length,
+  }));
+}

@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 import { useEffect } from 'react';
-import Image from 'next/image';
 import { Photo } from '@/lib/data';
 
 interface LightboxProps {
@@ -30,17 +30,11 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
       onClick={onClose}
     >
       <div className="relative max-w-[90vw] max-h-[90vh]">
-        <Image
-          src={photo.src}
-          alt={photo.alt}
-          width={photo.width}
-          height={photo.height}
+        <img
+          src={photo.image_url}
+          alt={photo.title}
           className="object-contain max-h-[85vh] w-auto shadow-2xl"
-          quality={100}
         />
-        <div className="mt-4 text-center font-serif text-neutral-500 text-sm tracking-widest">
-          {photo.title} <span className="mx-2">—</span> {photo.year}
-        </div>
       </div>
       
       <button 

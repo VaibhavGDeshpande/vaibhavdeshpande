@@ -1,10 +1,13 @@
 import { Suspense } from 'react';
-import GalleryClient from '../../components/gallery/GalleryClient';
+import { getPhotos } from '@/lib/data';
+import GalleryClient from '@/components/gallery/GalleryClient';
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const photos = await getPhotos(); 
+
   return (
     <Suspense fallback={<GallerySkeleton />}>
-      <GalleryClient />
+      <GalleryClient photos={photos} /> 
     </Suspense>
   );
 }
