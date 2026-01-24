@@ -2,7 +2,7 @@ import supabase from './supabase';
 export const CATEGORY_CONFIG = {
   Animals: 6,
   Bike: 14,
-  Fort: 9,
+  Nature: 9,
   Moon: 12,
   Sky: 21,
   Space: 6,
@@ -21,7 +21,7 @@ export const PUNE_SUBFOLDERS = {
 export type Category =
   | 'Animals'
   | 'Bike'
-  | 'Fort'
+  | 'Nature'
   | 'Moon'
   | 'Pune Grand Tour'
   | 'Sky'
@@ -45,6 +45,23 @@ export interface Collection {
 }
 
 
+const HERO_IMAGE_URLS = [
+  'Sky/8.jpg',
+  'Moon/12.jpg',
+  'Nature/5.jpg',
+];
+
+const COLLECTION_COVER_MAP: Record<string, string> = {
+  'Pune Grand Tour': 'Pune Grand Tour/normal/18.jpg',
+  Moon: 'Moon/1.jpg',
+  Nature: 'Nature/3.jpg',
+  Animals: 'Animals/3.jpg',
+  Sky: 'Sky/3.jpg',
+  Space: 'Space/1.jpg',
+  Sun: 'Sun/1.jpg',
+  Bike: 'Bike/3.jpg',
+};
+
 
 const STORAGE_BASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL +
@@ -63,22 +80,21 @@ export async function getPhotos(): Promise<Photo[]> {
   }
 
   return data.map((row) => ({
-    id:row.id,
+    id: row.id,
     title: row.title,
     category: row.category as Category,
     image_url: `${STORAGE_BASE_URL}${row.image_url}`,
   }));
 }
 
-
 export async function getHeroImages(): Promise<Photo[]> {
   const photos = await getPhotos();
 
-  return [
-    photos.find((p) => p.category === 'Pune Grand Tour'),
-    photos.find((p) => p.category === 'Moon'),
-    photos.find((p) => p.category === 'Fort'),
-  ].filter(Boolean) as Photo[];
+  return photos.filter((photo) =>
+    HERO_IMAGE_URLS.includes(
+      photo.image_url.replace(STORAGE_BASE_URL, '')
+    )
+  );
 }
 
 
@@ -91,11 +107,21 @@ export async function getCollections(): Promise<Collection[]> {
     return acc;
   }, {});
 
-  return Object.entries(grouped).map(([category, items]) => ({
-    id: category,
-    name: category,
-    description: `A curated collection of ${category}`,
-    coverImage: items[0].image_url,
-    photoCount: items.length,
-  }));
+  return Object.entries(grouped).map(([category, items]) => {
+    const coverPath = COLLECTION_COVER_MAP[category];
+    const cover =
+      items.find(
+        (p) =>
+          p.image_url.replace(STORAGE_BASE_URL, '') === coverPath
+      ) ?? items[0]; // fallback
+
+    return {
+      id: category,
+      name: category,
+      description: `A curated collection of ${category}`,
+      coverImage: cover.image_url,
+      photoCount: items.length,
+    };
+  });
 }
+

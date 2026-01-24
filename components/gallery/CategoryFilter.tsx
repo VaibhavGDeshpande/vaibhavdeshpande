@@ -16,7 +16,7 @@ const categories: { value: FilterCategory; label: string }[] = [
   { value: 'All', label: 'All' },
   { value: 'Animals', label: 'Animals' },
   { value: 'Bike', label: 'Bike' },
-  { value: 'Fort', label: 'Fort' },
+  { value: 'Nature', label: 'Naure' },
   { value: 'Moon', label: 'Moon' },
   { value: 'Pune Grand Tour', label: 'Pune Grand Tour' },
   { value: 'Sky', label: 'Sky' },
