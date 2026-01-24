@@ -30,7 +30,7 @@ export type Category =
   | 'Nature';
 
 export interface Photo {
-  id: null | undefined;
+  id: null | string;
   title: string;
   category: Category;
   image_url: string;

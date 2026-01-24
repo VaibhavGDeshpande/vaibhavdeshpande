@@ -41,13 +41,10 @@ export default function HeroSection({ heroImages }: HeroSectionProps) {
       {slides.map((photo, index) => {
         const isActive = index === currentIndex;
 
-        // fallback aspect logic (since DB version doesn’t store width/height)
-        const isPortrait = false;
-
         return (
           <div
             key={photo.id}
-            className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
+            className={`absolute inset-0 transition-opacity duration-2000 ease-in-out ${
               isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
@@ -58,7 +55,7 @@ export default function HeroSection({ heroImages }: HeroSectionProps) {
               fill
               priority={index === 0}
               quality={90}
-              className={`object-cover opacity-80 transition-transform duration-[8000ms] ease-linear ${
+              className={`object-cover opacity-80 transition-transform duration-8000 ease-linear ${
                 isActive
                   ? direction > 0
                     ? 'scale-110'
@@ -71,12 +68,12 @@ export default function HeroSection({ heroImages }: HeroSectionProps) {
             />
 
             {/* OVERLAY */}
-            <div className="absolute inset-0 z-20 pointer-events-none bg-gradient-to-b from-black/30 via-transparent to-black/80" />
+            <div className="absolute inset-0 z-20 pointer-events-none bg-linear-to-b from-black/30 via-transparent to-black/80" />
 
             {/* TEXT */}
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center">
               <div
-                className={`text-center transition-all duration-[1500ms] delay-300 ease-out ${
+                className={`text-center transition-all duration-1500 delay-300 ease-out ${
                   isActive
                     ? 'translate-y-0 opacity-100'
                     : 'translate-y-8 opacity-0'
@@ -99,7 +96,7 @@ export default function HeroSection({ heroImages }: HeroSectionProps) {
         {slides.map((_, index) => (
           <div key={index} className="flex-1 h-full bg-white/10 relative overflow-hidden">
             <div
-              className={`absolute top-0 left-0 h-full bg-white transition-all duration-[7000ms] ease-linear ${
+              className={`absolute top-0 left-0 h-full bg-white transition-all duration-7000 ease-linear ${
                 index === currentIndex ? 'w-full' : 'w-0'
               }`}
             />
