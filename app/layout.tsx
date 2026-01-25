@@ -8,8 +8,41 @@ const sans = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const serif = EB_Garamond({ subsets: ['latin'], variable: '--font-serif' });
 
 export const metadata: Metadata = {
-  title: 'Vaibhav | Photographer',
-  description: 'A quiet gallery of visual works.',
+  title: {
+    default: 'Vaibhav | Photographer',
+    template: '%s | Vaibhav',
+  },
+  description: 'A quiet gallery of visual works by Vaibhav Deshpande',
+  metadataBase: new URL('https://vgdphotography.vercel.app'),
+
+  openGraph: {
+    title: 'Vaibhav | Photographer',
+    description: 'A quiet gallery of visual works.',
+    url: 'https://vgdphotography.vercel.app',
+    siteName: 'Vaibhav Photography',
+    images: [
+      {
+        url: '/vgd.jpg', 
+        width: 1200,
+        height: 630,
+        alt: 'Vaibhav Photography – Portfolio',
+      },
+    ],
+    type: 'website',
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vaibhav | Photographer',
+    description: 'A quiet gallery of visual works.',
+    images: ['/vgd.jpg'],
+  },
+
+  icons: {
+    icon: '/vgd.jpg',
+    shortcut: '/vgd.jpg',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({
