@@ -1,7 +1,14 @@
-import { getHeroImages } from '@/lib/data';
+import { getHeroImages, mobileGetHeroImages } from '@/lib/data';
 import HeroSection from './HeroSection';
 
 export default async function HeroSectionServer() {
-  const heroImages = await getHeroImages();
-  return <HeroSection heroImages={heroImages} />;
+  const desktopImages = await getHeroImages();
+  const mobileImages = await mobileGetHeroImages();
+
+  return (
+    <HeroSection
+      desktopImages={desktopImages}
+      mobileImages={mobileImages}
+    />
+  );
 }

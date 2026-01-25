@@ -49,6 +49,12 @@ const HERO_IMAGE_URLS = [
   'Nature/5.jpg',
 ];
 
+const MOBILE_HERO_IMAGE_URLS = [
+  'Sky/20.jpg',
+  'Moon/1.jpg',
+  'Nature/5.jpg',
+];
+
 const COLLECTION_COVER_MAP: Record<string, string> = {
   'Pune Grand Tour': 'Pune Grand Tour/normal/18.jpg',
   Moon: 'Moon/1.jpg',
@@ -88,6 +94,16 @@ export async function getHeroImages(): Promise<Photo[]> {
 
   return photos.filter((photo) =>
     HERO_IMAGE_URLS.includes(
+      photo.image_url.replace(STORAGE_BASE_URL, '')
+    )
+  );
+}
+
+export async function mobileGetHeroImages(): Promise<Photo[]> {
+  const photos = await getPhotos();
+
+  return photos.filter((photo) =>
+    MOBILE_HERO_IMAGE_URLS.includes(
       photo.image_url.replace(STORAGE_BASE_URL, '')
     )
   );

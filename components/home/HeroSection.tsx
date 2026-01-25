@@ -5,19 +5,36 @@ import { useState, useEffect } from 'react';
 import { Photo } from '@/lib/data';
 
 interface HeroSectionProps {
-  heroImages: Photo[];
+  desktopImages: Photo[];
+  mobileImages: Photo[];
 }
 
-export default function HeroSection({ heroImages }: HeroSectionProps) {
+export default function HeroSection({
+  desktopImages,
+  mobileImages,
+}: HeroSectionProps) {
+  const [isMobile, setIsMobile] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 
+  // Detect screen size
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  const heroImages = isMobile ? mobileImages : desktopImages;
+
   useEffect(() => {
     if (!heroImages.length) return;
+
     const interval = setInterval(() => {
       setCurrentIndex((i) => (i + 1) % heroImages.length);
       setDirection((d) => d * -1);
-    }, 7000);
+    }, 5000);
+
     return () => clearInterval(interval);
   }, [heroImages.length]);
 
