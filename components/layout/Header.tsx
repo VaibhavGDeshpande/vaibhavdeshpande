@@ -24,7 +24,7 @@ export default function Header() {
     <header
       className={`
         fixed top-0 inset-x-0 z-50
-        transition-all duration-500 ease-out
+        transition-all duration-500
         ${
           scrolled
             ? 'bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800'
@@ -32,25 +32,25 @@ export default function Header() {
         }
       `}
     >
-      <div className="max-w-7xl mx-auto px-2 h-14 flex items-center justify-between ">
-        
+      <div className="max-w-7xl mx-auto pr-8 h-16 flex items-center justify-between">
+
         {/* Logo */}
         <Link href="/" className="relative flex items-center">
           <Image
             src="/name1.png"
             alt="Vaibhav Deshpande"
-            width={250}
-            height={50}
+            width={220}
+            height={44}
             priority
             className={`
-              transition-all duration-500 mt-3 pr-4
-              ${scrolled ? 'opacity-90 scale-[0.9]' : 'opacity-100 scale-100'}
+              transition-all duration-500
+              ${scrolled ? 'opacity-90 scale-95' : 'opacity-100'}
             `}
           />
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-10 md:gap-14">
+        <nav className="flex items-center gap-8 sm:gap-10 md:gap-14">
           {navLinks.map((link) => {
             const isActive =
               pathname === link.href ||
@@ -62,7 +62,7 @@ export default function Header() {
                 href={link.href}
                 className={`
                   group relative
-                  text-[10px] md:text-[11px]
+                  text-[10px] sm:text-[11px]
                   uppercase tracking-[0.35em]
                   transition-colors duration-300
                   ${
@@ -74,11 +74,10 @@ export default function Header() {
               >
                 {link.name}
 
-                {/* Editorial underline */}
                 <span
                   className={`
                     absolute left-0 -bottom-2 h-px bg-neutral-100
-                    transition-all duration-500 ease-out
+                    transition-all duration-500
                     ${
                       isActive
                         ? 'w-full opacity-100'
