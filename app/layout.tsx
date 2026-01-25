@@ -17,12 +17,12 @@ export const metadata: Metadata = {
 
   openGraph: {
     title: 'Vaibhav | Photographer',
-    description: 'A quiet gallery of visual works.',
+    description: 'A gallery of visual works.',
     url: 'https://vgdphotography.vercel.app',
     siteName: 'Vaibhav Photography',
     images: [
       {
-        url: '/vgd.jpg', 
+        url: '/vgd.png', 
         width: 1200,
         height: 630,
         alt: 'Vaibhav Photography – Portfolio',
@@ -35,12 +35,12 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Vaibhav | Photographer',
     description: 'A quiet gallery of visual works.',
-    images: ['/vgd.jpg'],
+    images: ['/vgd.png'],
   },
 
   icons: {
-    icon: '/vgd.jpg',
-    shortcut: '/vgd.jpg',
+    icon: '/vgd.png',
+    shortcut: '/vgd.png',
     apple: '/apple-touch-icon.png',
   },
 };
