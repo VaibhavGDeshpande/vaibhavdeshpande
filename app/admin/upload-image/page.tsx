@@ -12,7 +12,7 @@ export default function AdminPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
-        router.replace('/login');
+        router.replace('/admin/login');
       } else {
         setLoading(false);
       }
