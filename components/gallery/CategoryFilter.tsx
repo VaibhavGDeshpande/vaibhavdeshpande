@@ -1,9 +1,9 @@
 'use client';
 
-// 1. Import the specific Category type from your data file
+
 import { Category } from '@/lib/data';
 
-// 2. Define a union type that includes "All"
+
 export type FilterCategory = Category | 'All';
 
 interface CategoryFilterProps {
@@ -11,12 +11,12 @@ interface CategoryFilterProps {
   onCategoryChange: (category: FilterCategory) => void;
 }
 
-// 3. Update the list to match your exact folder names from data.ts
+
 const categories: { value: FilterCategory; label: string }[] = [
   { value: 'All', label: 'All' },
   { value: 'Animals', label: 'Animals' },
   { value: 'Bike', label: 'Bike' },
-  { value: 'Nature', label: 'Naure' },
+  { value: 'Nature', label: 'Nature' },
   { value: 'Moon', label: 'Moon' },
   { value: 'Pune Grand Tour', label: 'Pune Grand Tour' },
   { value: 'Sky', label: 'Sky' },

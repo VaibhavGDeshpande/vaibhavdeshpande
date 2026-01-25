@@ -14,7 +14,7 @@ export default function AboutSection() {
             <div className="relative aspect-4/5 overflow-hidden bg-neutral-900 grayscale group-hover:grayscale-0 transition-all duration-1000 ease-out">
               <Image
 
-                src="/assets/Sun/1.jpg" 
+                src="https://briysjozqxpqjtdyohje.supabase.co/storage/v1/object/public/photos/Sun/1.jpg" 
                 alt="Vaibhav Deshpande"
                 fill
                 className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000"

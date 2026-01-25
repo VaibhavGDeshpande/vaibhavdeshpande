@@ -1,22 +1,20 @@
 import supabase from './supabase';
-export const CATEGORY_CONFIG = {
-  Animals: 6,
-  Bike: 14,
-  Nature: 9,
-  Moon: 12,
-  Sky: 21,
-  Space: 6,
-  Sun: 5,
-};
+// export const CATEGORY_CONFIG = {
+//   Animals: 6,
+//   Bike: 14,
+//   Nature: 9,
+//   Moon: 12,
+//   Sky: 21,
+//   Space: 7,
+//   Sun: 5,
+// };
 
-export const PUNE_SUBFOLDERS = {
-  faces: 5,
-  motion: 6,
-  normal: 21,
-  opening: 4,
-};
-
-
+// export const PUNE_SUBFOLDERS = {
+//   faces: 5,
+//   motion: 6,
+//   normal: 21,
+//   opening: 4,
+// };
 
 export type Category =
   | 'Animals'
@@ -30,7 +28,7 @@ export type Category =
   | 'Nature';
 
 export interface Photo {
-  id: null | string;
+  id: string;
   title: string;
   category: Category;
   image_url: string;
@@ -66,8 +64,6 @@ const COLLECTION_COVER_MAP: Record<string, string> = {
 const STORAGE_BASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL +
   '/storage/v1/object/public/photos/';
-
-
 
 export async function getPhotos(): Promise<Photo[]> {
   const { data, error } = await supabase
