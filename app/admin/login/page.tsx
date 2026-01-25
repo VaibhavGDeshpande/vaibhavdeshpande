@@ -27,7 +27,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push('/admin'); // 👈 redirect after login
+    router.push('/admin/upload-image'); // 👈 redirect after login
     router.refresh();
   };
 
