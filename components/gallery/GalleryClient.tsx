@@ -1,8 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import { Photo } from '@/lib/data';
 import Lightbox from '@/components/gallery/Lightbox';
 import CategoryFilter, { FilterCategory } from '@/components/gallery/CategoryFilter';
@@ -55,28 +55,26 @@ export default function GalleryClient({ photos }: GalleryClientProps) {
       </div>
 
       {/* Grid */}
-      <div className="mt-12 grid gap-8 sm:gap-10
-        grid-cols-1
-        sm:grid-cols-2
-        lg:grid-cols-3
-        max-w-[1600px] mx-auto"
+      <div className="mt-12 max-w-400 mx-auto
+  columns-1
+  sm:columns-2
+  lg:columns-3
+  gap-8 sm:gap-10"
       >
+
         {filteredPhotos.map((photo) => (
           <article
             key={photo.id}
-            className="group cursor-zoom-in"
+            className="mb-8 break-inside-avoid group cursor-zoom-in"
             onClick={() => setSelectedPhoto(photo)}
           >
-            <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900">
-              <Image
-                src={photo.image_url}
-                alt={photo.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            </div>
+            <img
+              src={photo.image_url}
+              alt={photo.title}
+              className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+            />
           </article>
+
         ))}
       </div>
 

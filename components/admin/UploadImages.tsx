@@ -5,19 +5,22 @@ import { useState, useEffect } from 'react';
 import supabase from '@/lib/supabase';
 import { useUser } from '@/lib/useUser';
 
+type Dimensions = { w: number; h: number };
+
 export default function UploadImage() {
   const user = useUser();
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [dimensions, setDimensions] = useState<{ w: number; h: number } | null>(null);
+  const [dimensions, setDimensions] = useState<Dimensions | null>(null);
+
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Nature');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
   /* ---------------------------------------------
-     Preview + dimension detection
+     Preview + initial dimension detection
   --------------------------------------------- */
   useEffect(() => {
     if (!file) {
@@ -47,20 +50,34 @@ export default function UploadImage() {
   }
 
   /* ---------------------------------------------
-     Convert to JPG (no crop)
+     Convert to JPG (no crop, no resize)
   --------------------------------------------- */
   const convertToJpg = async (file: File): Promise<Blob> => {
-    const img = await createImageBitmap(file);
+    const bitmap = await createImageBitmap(file);
     const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
 
     const ctx = canvas.getContext('2d')!;
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(bitmap, 0, 0);
 
     return new Promise((resolve) =>
       canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', 0.92)
     );
+  };
+
+  /* ---------------------------------------------
+     Get dimensions from a Blob (authoritative)
+  --------------------------------------------- */
+  const getBlobDimensions = async (blob: Blob): Promise<Dimensions> => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.src = url;
+
+    await new Promise((res) => (img.onload = res));
+    URL.revokeObjectURL(url);
+
+    return { w: img.width, h: img.height };
   };
 
   /* ---------------------------------------------
@@ -73,6 +90,9 @@ export default function UploadImage() {
     setProgress(0);
 
     try {
+      /* -----------------------------
+         Determine next filename
+      ----------------------------- */
       const { data } = await supabase
         .from('photos')
         .select('image_url')
@@ -87,28 +107,48 @@ export default function UploadImage() {
       const nextNumber = numbers.length ? Math.max(...numbers) + 1 : 1;
       const filePath = `${category}/${nextNumber}.jpg`;
 
+      /* -----------------------------
+         Convert + re-read dimensions
+      ----------------------------- */
       const jpgBlob = await convertToJpg(file);
+      const { w, h } = await getBlobDimensions(jpgBlob);
 
+      const orientation =
+        w === h ? 'square' : w > h ? 'landscape' : 'portrait';
+
+      /* -----------------------------
+         Upload to Supabase Storage
+      ----------------------------- */
       const { error: uploadError } = await supabase.storage
         .from('photos')
         .upload(filePath, jpgBlob, {
           upsert: false,
+          contentType: 'image/jpeg',
         });
-
-      // Simulate progress completion
-      setProgress(100);
 
       if (uploadError) throw uploadError;
 
-      const { error: insertError } = await supabase.from('photos').insert({
-        title,
-        category,
-        image_url: filePath,
-      });
+      setProgress(100);
+
+      /* -----------------------------
+         Insert DB record
+      ----------------------------- */
+      const { error: insertError } = await supabase
+        .from('photos')
+        .insert({
+          title,
+          category,
+          image_url: filePath,
+          width: w,
+          height: h,
+          aspect_ratio: w / h,
+          orientation,
+        });
 
       if (insertError) throw insertError;
 
       alert('Upload successful 🎉');
+
       setFile(null);
       setTitle('');
       setProgress(0);
@@ -122,7 +162,7 @@ export default function UploadImage() {
 
   return (
     <section className="pt-32 px-6 md:px-12 bg-neutral-950 min-h-screen">
-      {/* HEADER SPACE */}
+      {/* HEADER */}
       <header className="mb-12">
         <h1 className="text-3xl md:text-4xl font-serif text-neutral-200">
           Upload Image
@@ -132,11 +172,9 @@ export default function UploadImage() {
         </p>
       </header>
 
-      {/* MAIN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
         {/* LEFT — FORM */}
         <div className="space-y-6">
-          {/* FILE INPUT */}
           <label className="block">
             <span className="text-xs uppercase tracking-widest text-neutral-500">
               Image File
@@ -153,7 +191,6 @@ export default function UploadImage() {
             />
           </label>
 
-          {/* TITLE */}
           <label className="block">
             <span className="text-xs uppercase tracking-widest text-neutral-500">
               Title
@@ -166,7 +203,6 @@ export default function UploadImage() {
             />
           </label>
 
-          {/* CATEGORY */}
           <label className="block">
             <span className="text-xs uppercase tracking-widest text-neutral-500">
               Category
@@ -187,7 +223,6 @@ export default function UploadImage() {
             </select>
           </label>
 
-          {/* PROGRESS */}
           {loading && (
             <div className="w-full bg-neutral-800 h-1 overflow-hidden">
               <div
@@ -197,7 +232,6 @@ export default function UploadImage() {
             </div>
           )}
 
-          {/* ACTION */}
           <button
             onClick={handleUpload}
             disabled={!file || loading}

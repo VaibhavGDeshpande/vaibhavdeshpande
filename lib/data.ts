@@ -30,9 +30,15 @@ export type Category =
 export interface Photo {
   id: string;
   title: string;
-  category: Category;
+  category: string;
   image_url: string;
+
+  width: number;
+  height: number;
+  aspect_ratio: number;
+  orientation: 'portrait' | 'landscape' | 'square';
 }
+
 
 export interface Collection {
   id: string;
@@ -74,7 +80,16 @@ const STORAGE_BASE_URL =
 export async function getPhotos(): Promise<Photo[]> {
   const { data, error } = await supabase
     .from('photos')
-    .select('id, title, category, image_url');
+    .select(`
+  id,
+  title,
+  category,
+  image_url,
+  width,
+  height,
+  aspect_ratio,
+  orientation
+`)
 
   if (error || !data) {
     console.error('Supabase error:', error);
@@ -86,6 +101,10 @@ export async function getPhotos(): Promise<Photo[]> {
     title: row.title,
     category: row.category as Category,
     image_url: `${STORAGE_BASE_URL}${row.image_url}`,
+    width: row.width,
+    height: row.height,
+    aspect_ratio: row.aspect_ratio,
+    orientation: row.orientation,
   }));
 }
 
