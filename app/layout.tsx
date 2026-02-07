@@ -52,9 +52,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body className="bg-neutral-950 text-neutral-400 antialiased selection:bg-neutral-800 selection:text-white">
+      <body className="bg-neutral-950 text-neutral-400 antialiased">
         <Header />
-        <main className="min-h-screen flex flex-col fade-in">{children}</main>
+        <main className="min-h-screen fade-in">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
