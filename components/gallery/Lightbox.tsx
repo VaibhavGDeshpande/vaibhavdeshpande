@@ -44,11 +44,11 @@ function DownloadWarning({
         {/* Licensing CTA */}
         <div className="mb-8">
           <a
-            href="mailto:vaibhavdeshpande@email.com?subject=Photo%20Licensing%20Request"
+            href="mailto:deshpande.vaibhav1012@gmail.com?subject=Photo%20Licensing%20Request"
             className="inline-flex items-center gap-2 text-sm
               text-neutral-400 hover:text-white transition underline underline-offset-4"
           >
-            Contact for licensing
+            Contact for high quality and licensed image
           </a>
         </div>
 

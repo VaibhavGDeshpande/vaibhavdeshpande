@@ -3,7 +3,8 @@ import sharp from 'sharp';
 import supabase from '@/lib/supabase';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'nodejs'; 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic'; 
 
 export async function GET(
   _req: NextRequest,
@@ -83,7 +84,7 @@ const watermarkSvg = `
         gravity: 'center',
       },
     ])
-    .jpeg({ quality: 90 })
+    .jpeg({ quality: 50 })
     .toBuffer();
 
   
