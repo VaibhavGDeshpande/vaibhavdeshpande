@@ -77,13 +77,23 @@ const watermarkSvg = `
 </svg>
 `;
 
+const watermarkBuffer = await sharp(
+  Buffer.from(watermarkSvg),
+  {
+    density: 300, 
+  }
+)
+  .resize(width, height)
+  .png()
+  .toBuffer();
+
   const watermarkedImage = await image
     .composite([
-      {
-        input: Buffer.from(watermarkSvg),
-        gravity: 'center',
-      },
-    ])
+    {
+      input: watermarkBuffer,
+      blend: 'over', 
+    },
+  ])
     .jpeg({ quality: 50 })
     .toBuffer();
 
