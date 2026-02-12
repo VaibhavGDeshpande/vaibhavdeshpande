@@ -38,7 +38,7 @@ function DownloadWarning({
 
         {/* Watermark name */}
         <p className="mb-6 text-neutral-200 italic tracking-wide">
-          “vgdphotography”
+          “Vaibhav Deshpande”
         </p>
 
         {/* Licensing CTA */}

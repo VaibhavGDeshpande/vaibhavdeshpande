@@ -2,14 +2,16 @@ import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import supabase from '@/lib/supabase';
 import { NextRequest } from 'next/server';
+import path from 'path';
+import fs from 'fs/promises';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; 
-const DOWNLOAD_MAX_DIMENSION = 2000; 
-const JPEG_QUALITY = 70; 
+const MAX_FILE_SIZE = 15 * 1024 * 1024;
+const DOWNLOAD_MAX_DIMENSION = 2000;
+const JPEG_QUALITY = 70;
 
 export async function GET(
   _req: NextRequest,
@@ -18,7 +20,7 @@ export async function GET(
   const { id } = await context.params;
 
   try {
-    // 1. Fetch photo metadata
+    // 1️⃣ Get image record from Supabase
     const { data: photo, error } = await supabase
       .from('photos')
       .select('image_url, title')
@@ -29,15 +31,13 @@ export async function GET(
       return new NextResponse('Image not found', { status: 404 });
     }
 
-    const path = photo.image_url;
-
-    if (!path) {
+    if (!photo.image_url) {
       return new NextResponse('Invalid image path', { status: 500 });
     }
 
-    // 2. Download original image
+    // 2️⃣ Download image from Supabase Storage
     const { data: file, error: storageError } =
-      await supabase.storage.from('photos').download(path);
+      await supabase.storage.from('photos').download(photo.image_url);
 
     if (storageError || !file) {
       console.error('Storage error:', storageError);
@@ -46,12 +46,11 @@ export async function GET(
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-
     if (buffer.length > MAX_FILE_SIZE) {
       return new NextResponse('Image too large', { status: 413 });
     }
 
-
+    // 3️⃣ Prepare base image
     let image = sharp(buffer);
     const metadata = await image.metadata();
 
@@ -62,93 +61,90 @@ export async function GET(
     let width = metadata.width;
     let height = metadata.height;
 
+    // Resize if too large
+    const shouldResize =
+      width > DOWNLOAD_MAX_DIMENSION || height > DOWNLOAD_MAX_DIMENSION;
 
-    const shouldResize = width > DOWNLOAD_MAX_DIMENSION || height > DOWNLOAD_MAX_DIMENSION;
-    
     if (shouldResize) {
-      const scale = Math.min(1, DOWNLOAD_MAX_DIMENSION / Math.max(width, height));
+      const scale = Math.min(
+        1,
+        DOWNLOAD_MAX_DIMENSION / Math.max(width, height)
+      );
+
       width = Math.round(width * scale);
       height = Math.round(height * scale);
+
       image = image.resize(width, height, {
-        kernel: sharp.kernel.lanczos3, 
+        kernel: sharp.kernel.lanczos3,
         withoutEnlargement: true,
       });
     }
 
-    // 6. Create watermark using SVG (Serverless friendly)
-    const activeDimension = Math.max(width, height);
-    const fontSize = Math.floor(activeDimension / 20);
-    const text = 'vgdphotography';
-    
-    // Calculate pattern repetition
-    // We create a large enough grid to cover the image even when rotated
-    const patternWidth = fontSize * 10;
-    const patternHeight = fontSize * 4;
-    const cols = Math.ceil(activeDimension * 1.5 / patternWidth) + 2;
-    const rows = Math.ceil(activeDimension * 1.5 / patternHeight) + 2;
+    // 4️⃣ Load watermark
+    const watermarkPath = path.join(
+      process.cwd(),
+      'public',
+      'name1.png'
+    );
 
-    let svgContent = '';
-    
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        // Offset every other row
-        const x = c * patternWidth + (r % 2 ? patternWidth / 2 : 0);
-        const y = r * patternHeight;
-        svgContent += `<text x="${x}" y="${y}" fill="rgba(255,255,255,0.3)" font-family="Arial" font-weight="bold" font-size="${fontSize}" transform="rotate(-30, ${x}, ${y})">${text}</text>`;
-      }
+    let watermarkBuffer: Buffer;
+
+    try {
+      watermarkBuffer = await fs.readFile(watermarkPath);
+    } catch (e) {
+      console.error('Failed to load watermark image:', e);
+      return new NextResponse('Watermark asset missing', { status: 500 });
     }
 
-    const svgImage = `
-      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <style>
-          .watermark { 
-            fill: rgba(255, 255, 255, 0.3); 
-            font-size: ${fontSize}px; 
-            font-family: Arial, sans-serif; 
-            font-weight: bold;
-          }
-        </style>
-        <g transform="translate(-${width * 0.2}, -${height * 0.2})"> 
-             ${svgContent}
-        </g>
-      </svg>
-    `;
+    // 5️⃣ Make watermark BIG (75% of image width)
+    const watermarkWidth = Math.floor(width * 0.75);
 
-    const watermarkBuffer = Buffer.from(svgImage);
+    const resizedWatermark = await sharp(watermarkBuffer)
+      .resize({ width: watermarkWidth })
+      .png()
+      .toBuffer();
 
-    // 7. Composite watermark onto original image with compression
+    // 6️⃣ Apply opacity (25%)
+    const watermarkWithOpacity = await sharp(resizedWatermark)
+      .ensureAlpha()
+      .modulate({ brightness: 1 }) // keeps original colors
+      .toBuffer();
+
+    // 7️⃣ Composite centered watermark
     const watermarkedImage = await image
       .composite([
         {
-          input: watermarkBuffer,
+          input: watermarkWithOpacity,
+          gravity: 'center', // 🔥 perfect center
           blend: 'over',
         },
       ])
-      .jpeg({ 
-        quality: JPEG_QUALITY, 
-        progressive: true, 
-        mozjpeg: true, 
-        chromaSubsampling: '4:2:0', 
-        optimizeCoding: true, 
+      .jpeg({
+        quality: JPEG_QUALITY,
+        progressive: true,
+        mozjpeg: true,
+        chromaSubsampling: '4:2:0',
+        optimizeCoding: true,
       })
       .toBuffer();
 
-    // 8. Return compressed watermarked image
     return new NextResponse(new Uint8Array(watermarkedImage), {
       headers: {
         'Content-Type': 'image/jpeg',
-        'Content-Disposition': `attachment; filename="${photo.title || 'photo'}.jpg"`,
+        'Content-Disposition': `attachment; filename="${
+          photo.title || 'photo'
+        }.jpg"`,
         'Content-Length': watermarkedImage.length.toString(),
         'Cache-Control': 'no-store',
       },
     });
-
   } catch (err) {
     console.error('Image processing error:', {
       id,
       error: err instanceof Error ? err.message : 'Unknown error',
-      stack: err instanceof Error ? err.stack : undefined
+      stack: err instanceof Error ? err.stack : undefined,
     });
+
     return new NextResponse('Failed to process image', { status: 500 });
   }
 }
