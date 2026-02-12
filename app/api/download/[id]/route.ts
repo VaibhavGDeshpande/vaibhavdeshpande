@@ -117,6 +117,7 @@ export async function GET(
           input: watermarkWithOpacity,
           gravity: 'center', // 🔥 perfect center
           blend: 'over',
+
         },
       ])
       .jpeg({
