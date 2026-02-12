@@ -2,16 +2,14 @@ import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import supabase from '@/lib/supabase';
 import { NextRequest } from 'next/server';
-import { createCanvas } from 'canvas';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
-const MAX_DIMENSION = 4000;
-const DOWNLOAD_MAX_DIMENSION = 2000; // Compress download images
-const JPEG_QUALITY = 70; // Lower quality for better compression
+const MAX_FILE_SIZE = 15 * 1024 * 1024; 
+const DOWNLOAD_MAX_DIMENSION = 2000; 
+const JPEG_QUALITY = 70; 
 
 export async function GET(
   _req: NextRequest,
@@ -48,12 +46,12 @@ export async function GET(
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 3. Check file size
+
     if (buffer.length > MAX_FILE_SIZE) {
       return new NextResponse('Image too large', { status: 413 });
     }
 
-    // 4. Read image metadata using sharp
+
     let image = sharp(buffer);
     const metadata = await image.metadata();
 
@@ -64,7 +62,7 @@ export async function GET(
     let width = metadata.width;
     let height = metadata.height;
 
-    // 5. Resize for download (compress dimensions)
+
     const shouldResize = width > DOWNLOAD_MAX_DIMENSION || height > DOWNLOAD_MAX_DIMENSION;
     
     if (shouldResize) {
@@ -72,61 +70,51 @@ export async function GET(
       width = Math.round(width * scale);
       height = Math.round(height * scale);
       image = image.resize(width, height, {
-        kernel: sharp.kernel.lanczos3, // High-quality downscaling
+        kernel: sharp.kernel.lanczos3, 
         withoutEnlargement: true,
       });
     }
 
-    // 6. Create watermark using Canvas
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
+    // 6. Create watermark using SVG (Serverless friendly)
+    const activeDimension = Math.max(width, height);
+    const fontSize = Math.floor(activeDimension / 20);
+    const text = 'vgdphotography';
+    
+    // Calculate pattern repetition
+    // We create a large enough grid to cover the image even when rotated
+    const patternWidth = fontSize * 10;
+    const patternHeight = fontSize * 4;
+    const cols = Math.ceil(activeDimension * 1.5 / patternWidth) + 2;
+    const rows = Math.ceil(activeDimension * 1.5 / patternHeight) + 2;
 
-    // Calculate font size and spacing
-// Calculate font size and spacing
-const fontSize = Math.max(width, height) / 16; // Slightly smaller for cleaner look
-const spacingX = fontSize * 8; // Horizontal spacing
-const spacingY = fontSize * 3; // Less vertical spacing (reduced from 8)
-const text = 'vgdphotography';
+    let svgContent = '';
+    
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Offset every other row
+        const x = c * patternWidth + (r % 2 ? patternWidth / 2 : 0);
+        const y = r * patternHeight;
+        svgContent += `<text x="${x}" y="${y}" fill="rgba(255,255,255,0.3)" font-family="Arial" font-weight="bold" font-size="${fontSize}" transform="rotate(-30, ${x}, ${y})">${text}</text>`;
+      }
+    }
 
-// Set font properties
-ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-ctx.textBaseline = 'top';
+    const svgImage = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <style>
+          .watermark { 
+            fill: rgba(255, 255, 255, 0.3); 
+            font-size: ${fontSize}px; 
+            font-family: Arial, sans-serif; 
+            font-weight: bold;
+          }
+        </style>
+        <g transform="translate(-${width * 0.2}, -${height * 0.2})"> 
+             ${svgContent}
+        </g>
+      </svg>
+    `;
 
-// Measure text width for better positioning
-const textMetrics = ctx.measureText(text);
-const textWidth = textMetrics.width;
-const textHeight = fontSize * 1.2; // Approximate text height
-
-// Save context state
-ctx.save();
-
-// Move to center and rotate
-ctx.translate(width / 2, height / 2);
-ctx.rotate(-30 * Math.PI / 180);
-
-// Calculate grid boundaries
-const diagonal = Math.sqrt(width * width + height * height);
-const startX = -diagonal;
-const endX = diagonal;
-const startY = -diagonal;
-const endY = diagonal;
-
-// Draw repeating watermark pattern with controlled spacing
-let rowOffset = 0;
-for (let y = startY; y < endY; y += spacingY) {
-  for (let x = startX + rowOffset; x < endX; x += spacingX) {
-    ctx.fillText(text, x, y);
-  }
-  // Alternate row offset for brick pattern (prevents vertical alignment)
-  rowOffset = rowOffset === 0 ? spacingX / 2 : 0;
-}
-
-// Restore context
-ctx.restore();
-
-    // Convert canvas to buffer
-    const watermarkBuffer = canvas.toBuffer('image/png');
+    const watermarkBuffer = Buffer.from(svgImage);
 
     // 7. Composite watermark onto original image with compression
     const watermarkedImage = await image
