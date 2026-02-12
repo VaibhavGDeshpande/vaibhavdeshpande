@@ -53,11 +53,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="bg-neutral-950 text-neutral-400 antialiased">
-        <Header />
         <main className="min-h-screen fade-in">
           {children}
         </main>
-        <Footer />
       </body>
     </html>
   );

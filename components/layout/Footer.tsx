@@ -57,7 +57,7 @@ export default function Footer() {
               © {new Date().getFullYear()} — Pune, India
             </p>
             <p className="text-[10px] tracking-widest text-neutral-700 mt-2">
-              Designed for Silence.
+              Designed for Excellence
             </p>
           </div>
         </div>
