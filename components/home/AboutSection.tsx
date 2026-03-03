@@ -1,82 +1,60 @@
 'use client';
 
 import Image from 'next/image';
+import { getOptimizedImageUrl } from '@/lib/image';
 
 export default function AboutSection() {
   return (
-    <section
-      id="about"
-      className="py-24 sm:py-28 md:py-40 px-4 sm:px-6 bg-neutral-950 border-t border-neutral-900/50"
-    >
-      <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-24 items-start">
-
-          {/* Portrait */}
-          <div className="md:col-span-5 relative group">
-            <div className="relative aspect-[4/5] overflow-hidden bg-neutral-900 grayscale group-hover:grayscale-0 transition-all duration-1000">
+    <section id="about" className="relative z-10 py-20 sm:py-28">
+      <div className="section-wrap">
+        <div className="grid gap-10 md:grid-cols-12 md:items-start md:gap-14">
+          <div className="md:col-span-5">
+            <div className="glass-panel group relative aspect-[4/5] overflow-hidden rounded-3xl">
               <Image
-                src="https://briysjozqxpqjtdyohje.supabase.co/storage/v1/object/public/photos/Sun/1.jpg"
+                src={getOptimizedImageUrl(
+                  'https://briysjozqxpqjtdyohje.supabase.co/storage/v1/object/public/photos/Sun/1.jpg',
+                  { width: 1000, quality: 72 }
+                )}
                 alt="Vaibhav Deshpande"
                 fill
-                className="object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000"
+                className="object-cover opacity-85 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
                 sizes="(max-width: 768px) 100vw, 40vw"
               />
-              <div className="absolute inset-0 opacity-20 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
             </div>
-
-            <div className="mt-4 flex justify-between text-[10px] tracking-widest uppercase text-neutral-600">
-              <span>Portrait</span>
-              <span>Pune, IN</span>
-            </div>
+            <p className="mt-3 text-[10px] uppercase tracking-[0.26em] text-stone-500">Portrait / Pune, India</p>
           </div>
 
-          {/* Narrative */}
-          <div className="md:col-span-7 flex flex-col justify-center space-y-10">
-            <div className="space-y-6">
-              <h2 className="text-3xl sm:text-4xl md:text-6xl font-serif text-neutral-200 leading-tight">
-                The Observer
-              </h2>
-              <div className="h-px w-12 bg-neutral-800" />
+          <div className="md:col-span-7">
+            <p className="eyebrow">About</p>
+            <h2 className="headline-serif mt-3 text-4xl leading-tight sm:text-5xl md:text-6xl">The Observer</h2>
+
+            <div className="mt-6 max-w-2xl space-y-4 text-sm leading-relaxed text-stone-300 sm:text-base">
+              <p>
+                I am a photographer based in Pune, India, focused on moments where light and emotion quietly intersect.
+              </p>
+              <p>
+                My work moves between city streets, open skies, and textured details to build visual narratives with stillness and mood.
+              </p>
+              <p>Every image is an invitation to slow down, notice, and feel something honest.</p>
             </div>
 
-            <div className="space-y-6 text-neutral-400 font-light text-sm sm:text-base max-w-xl">
-              <p>
-                I am a photographer based in <span className="text-neutral-200">Pune, India</span>, 
-                driven by an unyielding passion for the visual medium.
-              </p>
-              <p>
-                I seek to capture the essence of a moment before it fades — the quiet,
-                the atmosphere, the unnoticed.
-              </p>
-              <p>
-                Every image is an invitation to pause, observe, and feel.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-neutral-900/50">
-              <div>
-                <h4 className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-2">
-                  Focus
-                </h4>
-                <p className="font-serif text-neutral-300 text-lg">
-                  Visual Narratives, Atmosphere
-                </p>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              <div className="glass-panel rounded-2xl p-5">
+                <p className="eyebrow">Focus</p>
+                <p className="mt-2 font-serif text-xl text-stone-100">Atmosphere & narratives</p>
               </div>
-
-              <div>
-                <h4 className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-2">
-                  Contact
-                </h4>
+              <div className="glass-panel rounded-2xl p-5">
+                <p className="eyebrow">Contact</p>
                 <a
                   href="mailto:deshpande.vaibhav1012@gmail.com"
-                  className="font-serif text-neutral-300 text-lg hover:text-white transition underline underline-offset-4"
+                  className="mt-2 inline-block font-serif text-xl text-stone-100 underline-offset-4 hover:underline"
                 >
-                  Get in Touch
+                  Get in touch
                 </a>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

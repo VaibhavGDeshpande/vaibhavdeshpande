@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, EB_Garamond } from 'next/font/google';
+import { Manrope, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 
-const sans = Inter({ subsets: ['latin'], variable: '--font-sans' });
-const serif = EB_Garamond({ subsets: ['latin'], variable: '--font-serif' });
+const sans = Manrope({ subsets: ['latin'], variable: '--font-sans' });
+const serif = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-serif',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -14,7 +16,6 @@ export const metadata: Metadata = {
   },
   description: 'A quiet gallery of visual works by Vaibhav Deshpande',
   metadataBase: new URL('https://vgdphotography.vercel.app'),
-
   openGraph: {
     title: 'Vaibhav | Photographer',
     description: 'A gallery of visual works.',
@@ -22,22 +23,20 @@ export const metadata: Metadata = {
     siteName: 'Vaibhav Photography',
     images: [
       {
-        url: '/vgd.png', 
+        url: '/vgd.png',
         width: 1200,
         height: 630,
-        alt: 'Vaibhav Photography – Portfolio',
+        alt: 'Vaibhav Photography - Portfolio',
       },
     ],
     type: 'website',
   },
-
   twitter: {
     card: 'summary_large_image',
     title: 'Vaibhav | Photographer',
     description: 'A quiet gallery of visual works.',
     images: ['/vgd.png'],
   },
-
   icons: {
     icon: '/vgd.png',
     shortcut: '/vgd.png',
@@ -52,10 +51,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <body className="bg-neutral-950 text-neutral-400 antialiased">
-        <main className="min-h-screen fade-in">
-          {children}
-        </main>
+      <body className="antialiased">
+        <main className="site-frame min-h-screen">{children}</main>
       </body>
     </html>
   );

@@ -3,88 +3,44 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 export default function Header() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const navLinks = [
     { name: 'Work', href: '/gallery' },
-    { name: 'Profile', href: '/#about' },
+    { name: 'About', href: '/#about' },
   ];
 
   return (
-    <header
-      className={`
-        fixed top-0 inset-x-0 z-50
-        transition-all duration-500
-        ${
-          scrolled
-            ? 'bg-neutral-950/80 backdrop-blur-md border-b border-neutral-800'
-            : 'bg-transparent'
-        }
-      `}
-    >
-      <div className="max-w-7xl mx-auto pr-8 h-16 flex items-center justify-between">
-
-        {/* Logo */}
-        <Link href="/" className="relative flex items-center">
+    <header className="relative z-40 px-3 py-3 sm:px-6 sm:py-4">
+      <div className="glass-panel mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-full px-3 shadow-2xl shadow-black/20 sm:px-5">
+        <Link href="/" className="relative flex shrink-0 items-center">
           <Image
             src="/name1.png"
             alt="Vaibhav Deshpande"
-            width={220}
-            height={44}
+            width={180}
+            height={38}
             priority
-            className={`
-              transition-all duration-500
-              ${scrolled ? 'opacity-90 scale-95' : 'opacity-100'}
-            `}
+            className="h-auto w-auto max-w-[140px] sm:max-w-[180px]"
           />
         </Link>
 
-        {/* Navigation */}
-        <nav className="flex items-center gap-8 sm:gap-10 md:gap-14">
+        <nav className="flex items-center gap-3 sm:gap-8">
           {navLinks.map((link) => {
-            const isActive =
-              pathname === link.href ||
-              (link.href === '/gallery' && pathname.startsWith('/gallery'));
+            const isActive = pathname === link.href || (link.href === '/gallery' && pathname.startsWith('/gallery'));
 
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`
-                  group relative
-                  text-[10px] sm:text-[11px]
-                  uppercase tracking-[0.35em]
-                  transition-colors duration-300
-                  ${
-                    isActive
-                      ? 'text-neutral-100'
-                      : 'text-neutral-400 hover:text-neutral-200'
-                  }
-                `}
+                className={`rounded-full px-3 py-2 text-[10px] uppercase tracking-[0.28em] transition sm:text-xs ${
+                  isActive
+                    ? 'bg-white/15 text-stone-100 ring-1 ring-white/35'
+                    : 'text-stone-300 hover:bg-white/10 hover:text-stone-100'
+                }`}
               >
                 {link.name}
-
-                <span
-                  className={`
-                    absolute left-0 -bottom-2 h-px bg-neutral-100
-                    transition-all duration-500
-                    ${
-                      isActive
-                        ? 'w-full opacity-100'
-                        : 'w-0 opacity-0 group-hover:w-full group-hover:opacity-100'
-                    }
-                  `}
-                />
               </Link>
             );
           })}

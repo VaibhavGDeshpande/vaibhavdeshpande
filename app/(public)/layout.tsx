@@ -9,9 +9,7 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <main className="min-h-screen fade-in">
-        {children}
-      </main>
+      <main className="relative z-10 min-h-screen">{children}</main>
       <Footer />
     </>
   );

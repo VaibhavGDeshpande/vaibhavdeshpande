@@ -1,1 +1,232 @@
 @import "tailwindcss";
+
+:root {
+  --bg-0: #09090b;
+  --bg-1: #121217;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-strong: rgba(255, 255, 255, 0.1);
+  --line: rgba(255, 255, 255, 0.14);
+  --text-main: #f5f5f4;
+  --text-soft: #c7c7be;
+  --text-dim: #8f8f88;
+  --accent: #f5cc8f;
+}
+
+html,
+body {
+  background: radial-gradient(circle at 15% 20%, rgba(245, 204, 143, 0.11), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(174, 220, 255, 0.09), transparent 36%),
+    var(--bg-0);
+  color: var(--text-soft);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(transparent 0, rgba(255, 255, 255, 0.03) 1px);
+  background-size: 100% 3px;
+  opacity: 0.18;
+  z-index: 1;
+}
+
+@layer components {
+  .site-frame {
+    @apply relative isolate;
+  }
+
+  .site-frame::before {
+    content: "";
+    @apply pointer-events-none fixed inset-0 -z-10;
+    background: linear-gradient(180deg, rgba(9, 9, 11, 0.16) 0%, rgba(9, 9, 11, 0.72) 100%);
+  }
+
+  .section-wrap {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-10;
+  }
+
+  .glass-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    @apply backdrop-blur-xl;
+  }
+
+  .eyebrow {
+    @apply text-[10px] uppercase tracking-[0.32em] sm:text-xs;
+    color: var(--text-dim);
+  }
+
+  .headline-serif {
+    @apply font-serif tracking-tight;
+    color: var(--text-main);
+  }
+
+  .btn-soft {
+    @apply inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] transition sm:text-xs;
+    border: 1px solid var(--line);
+    color: var(--text-soft);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .btn-soft:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+    color: var(--text-main);
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[10px] uppercase tracking-[0.25em] transition sm:text-xs;
+    background: linear-gradient(120deg, #f5cc8f, #ddaf72);
+    color: #18120b;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .btn-accent:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+
+  .camera-loader-wrap {
+    @apply flex flex-col items-center justify-center gap-4;
+  }
+
+  .camera-loader {
+    @apply relative flex h-24 w-24 items-center justify-center;
+  }
+
+  .camera-loader-compact {
+    @apply h-16 w-16;
+  }
+
+  .camera-body {
+    position: relative;
+    width: 76%;
+    height: 52%;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    animation: camera-bob 1.8s ease-in-out infinite;
+  }
+
+  .camera-body::before {
+    content: "";
+    position: absolute;
+    top: -18%;
+    left: 8%;
+    width: 34%;
+    height: 22%;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+  }
+
+  .camera-lens {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 44%;
+    height: 62%;
+    border-radius: 999px;
+    background: rgba(10, 10, 11, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .camera-lens-inner {
+    width: 58%;
+    height: 58%;
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9), rgba(245, 204, 143, 0.72) 28%, rgba(47, 67, 96, 0.78) 70%);
+    animation: lens-pulse 1.6s ease-in-out infinite;
+  }
+
+  .camera-flash {
+    position: absolute;
+    top: -42%;
+    right: -18%;
+    width: 36%;
+    height: 36%;
+    border-radius: 999px;
+    background: rgba(255, 244, 220, 0.18);
+  }
+
+  .camera-flash::before,
+  .camera-flash::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    background: rgba(255, 253, 238, 0.85);
+    opacity: 0;
+    transform: scale(0.35);
+  }
+
+  .camera-flash::before {
+    animation: flash-burst 1.8s ease-out infinite;
+  }
+
+  .camera-flash::after {
+    animation: flash-burst 1.8s ease-out infinite 0.9s;
+  }
+
+  .camera-loader-label {
+    @apply text-[10px] uppercase tracking-[0.3em] sm:text-xs;
+    color: var(--text-dim);
+  }
+}
+
+@layer utilities {
+  .fade-up {
+    animation: fade-up 700ms ease-out both;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes camera-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes lens-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: saturate(1);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: saturate(1.2);
+  }
+}
+
+@keyframes flash-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}

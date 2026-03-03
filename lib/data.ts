@@ -1,4 +1,5 @@
 import supabase from './supabase';
+import { unstable_cache } from 'next/cache';
 // export const CATEGORY_CONFIG = {
 //   Animals: 6,
 //   Bike: 14,
@@ -56,9 +57,9 @@ const HERO_IMAGE_URLS = [
 ];
 
 const MOBILE_HERO_IMAGE_URLS = [
-  'Sky/20.jpg',
+  'Sun/1.jpg',
   'Moon/1.jpg',
-  'Nature/5.jpg',
+  'Nature/4.jpg',
 ];
 
 const COLLECTION_COVER_MAP: Record<string, string> = {
@@ -77,7 +78,7 @@ const STORAGE_BASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL +
   '/storage/v1/object/public/photos/';
 
-export async function getPhotos(): Promise<Photo[]> {
+async function fetchPhotos(): Promise<Photo[]> {
   const { data, error } = await supabase
     .from('photos')
     .select(`
@@ -106,6 +107,14 @@ export async function getPhotos(): Promise<Photo[]> {
     aspect_ratio: row.aspect_ratio,
     orientation: row.orientation,
   }));
+}
+
+const getPhotosCached = unstable_cache(fetchPhotos, ['photos-all'], {
+  revalidate: 300,
+});
+
+export async function getPhotos(): Promise<Photo[]> {
+  return getPhotosCached();
 }
 
 export async function getHeroImages(): Promise<Photo[]> {

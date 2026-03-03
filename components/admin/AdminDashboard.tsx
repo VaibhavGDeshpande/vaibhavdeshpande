@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import supabase from '@/lib/supabase';
-import { Photo } from '@/lib/data';
+import type { Photo } from '@/lib/data';
 
 export default function AdminDashboard({ photos }: { photos: Photo[] }) {
   const [items, setItems] = useState(photos);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Category } from '@/lib/data';
+import type { Category } from '@/lib/data';
 
 export type FilterCategory = Category | 'All';
 
@@ -21,43 +21,27 @@ const categories: { value: FilterCategory; label: string }[] = [
   { value: 'Sun', label: 'Sun' },
 ];
 
-export default function CategoryFilter({
-  activeCategory,
-  onCategoryChange,
-}: CategoryFilterProps) {
+export default function CategoryFilter({ activeCategory, onCategoryChange }: CategoryFilterProps) {
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex gap-6 px-2 pb-4 md:justify-center md:flex-wrap md:gap-x-8 md:gap-y-4">
-        {categories.map((category) => (
-          <button
-            key={category.value}
-            onClick={() => onCategoryChange(category.value)}
-            className={`
-              relative whitespace-nowrap py-2 px-1
-              text-xs sm:text-sm tracking-[0.2em] uppercase
-              transition-colors duration-500
-              ${
-                activeCategory === category.value
-                  ? 'text-white'
-                  : 'text-neutral-500 hover:text-neutral-300'
-              }
-            `}
-          >
-            {category.label}
+    <div className="w-full overflow-x-auto pb-1">
+      <div className="flex w-max items-center gap-2 sm:mx-auto sm:w-full sm:flex-wrap sm:justify-center sm:gap-3">
+        {categories.map((category) => {
+          const active = activeCategory === category.value;
 
-            <span
-              className={`
-                absolute left-0 bottom-0 h-[1px] bg-white
-                transition-all duration-500 ease-out
-                ${
-                  activeCategory === category.value
-                    ? 'w-full opacity-100'
-                    : 'w-0 opacity-0'
-                }
-              `}
-            />
-          </button>
-        ))}
+          return (
+            <button
+              key={category.value}
+              onClick={() => onCategoryChange(category.value)}
+              className={`rounded-full px-4 py-2 text-[10px] uppercase tracking-[0.24em] transition sm:text-xs ${
+                active
+                  ? 'bg-white/15 text-stone-100 ring-1 ring-white/30'
+                  : 'bg-white/5 text-stone-400 ring-1 ring-white/10 hover:bg-white/10 hover:text-stone-100'
+              }`}
+            >
+              {category.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
