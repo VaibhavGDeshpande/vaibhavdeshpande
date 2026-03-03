@@ -59,7 +59,7 @@ const HERO_IMAGE_URLS = [
 const MOBILE_HERO_IMAGE_URLS = [
   'Sun/1.jpg',
   'Moon/1.jpg',
-  'Nature/4.jpg',
+  'Nature/2.jpg',
 ];
 
 const COLLECTION_COVER_MAP: Record<string, string> = {
