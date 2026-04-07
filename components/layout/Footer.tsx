@@ -39,9 +39,9 @@ export default function Footer() {
 
             <div className="sm:text-right">
               <p className="eyebrow">Studio Note</p>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-stone-400 sm:ml-auto">
+              {/* <p className="mt-4 max-w-md text-sm leading-relaxed text-stone-400 sm:ml-auto">
                 Available for editorial and commissioned work in Pune and across India.
-              </p>
+              </p> */}
               <button onClick={scrollToTop} className="btn-soft mt-6">
                 Back to top
               </button>
