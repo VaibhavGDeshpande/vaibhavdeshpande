@@ -2,7 +2,7 @@ interface OptimizeImageOptions {
   width?: number;
   height?: number;
   quality?: number;
-  format?: 'origin' | 'webp' | 'avif';
+  format?: 'origin' | 'webp';
 }
 
 const SUPABASE_PUBLIC_SEGMENT = '/storage/v1/object/public/photos/';
