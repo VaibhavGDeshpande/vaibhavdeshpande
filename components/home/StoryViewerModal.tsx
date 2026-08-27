@@ -14,6 +14,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import type { Highlight } from '@/lib/highlightsData';
+import { TRENDING_SONGS } from '@/lib/music';
 
 interface StoryViewerModalProps {
   highlights: Highlight[];
@@ -186,7 +187,18 @@ export default function StoryViewerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl transition-all">
-      <audio ref={audioRef} loop />
+      <audio
+        ref={audioRef}
+        loop
+        onError={() => {
+          console.warn('Audio URL 404/Error. Falling back to working audio stream.');
+          if (audioRef.current && TRENDING_SONGS[0]?.previewUrl) {
+            audioRef.current.src = TRENDING_SONGS[0].previewUrl;
+            audioRef.current.load();
+            audioRef.current.play().catch(() => {});
+          }
+        }}
+      />
 
       {/* BACKGROUND CLOSE TAP AREA */}
       <div className="absolute inset-0 z-0" onClick={onClose} />

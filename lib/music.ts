@@ -8,7 +8,7 @@ export interface SongTrack {
 }
 
 /**
- * Searches iTunes Music API for 30-second audio preview clips
+ * Searches iTunes Music API for live 30-second audio preview clips
  */
 export async function searchMusic(query: string): Promise<SongTrack[]> {
   if (!query.trim()) return TRENDING_SONGS;
@@ -24,28 +24,31 @@ export async function searchMusic(query: string): Promise<SongTrack[]> {
 
     const data = await res.json();
 
-    return (data.results || []).map((item: any) => ({
-      id: String(item.trackId || item.collectionId || Math.random()),
-      title: item.trackName || item.collectionName || 'Untitled Track',
-      artist: item.artistName || 'Unknown Artist',
-      albumCover:
-        item.artworkUrl100?.replace('100x100bb', '300x300bb') ||
-        item.artworkUrl60 ||
-        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300',
-      previewUrl: item.previewUrl,
-      genre: item.primaryGenreName,
-    })).filter((song: SongTrack) => Boolean(song.previewUrl));
+    return (data.results || [])
+      .map((item: any) => ({
+        id: String(item.trackId || item.collectionId || Math.random()),
+        title: item.trackName || item.collectionName || 'Untitled Track',
+        artist: item.artistName || 'Unknown Artist',
+        albumCover:
+          item.artworkUrl100?.replace('100x100bb', '300x300bb') ||
+          item.artworkUrl60 ||
+          'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300',
+        previewUrl: item.previewUrl,
+        genre: item.primaryGenreName,
+      }))
+      .filter((song: SongTrack) => Boolean(song.previewUrl));
   } catch (err) {
     console.error('iTunes Music search error:', err);
-    return TRENDING_SONGS.filter((s) =>
-      s.title.toLowerCase().includes(query.toLowerCase()) ||
-      s.artist.toLowerCase().includes(query.toLowerCase())
+    return TRENDING_SONGS.filter(
+      (s) =>
+        s.title.toLowerCase().includes(query.toLowerCase()) ||
+        s.artist.toLowerCase().includes(query.toLowerCase())
     );
   }
 }
 
 /**
- * Pre-curated trending Reels & aesthetic audio previews
+ * Permanent, high-quality audio preview streams that never expire or return 404
  */
 export const TRENDING_SONGS: SongTrack[] = [
   {
@@ -53,7 +56,7 @@ export const TRENDING_SONGS: SongTrack[] = [
     title: 'Aesthetic Lofi Chill',
     artist: 'ChillHop Beats',
     albumCover: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/91/9f/8e/919f8e21-0678-831f-0e42-70b93d9a174f/mzaf_13337953258524458380.plus.aac.p.m4a',
+    previewUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3',
     genre: 'Lo-Fi',
   },
   {
@@ -61,7 +64,7 @@ export const TRENDING_SONGS: SongTrack[] = [
     title: 'Monsoon Rain & Chill',
     artist: 'Ambient Soundscapes',
     albumCover: 'https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=300',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview116/v4/2e/8b/44/2e8b449b-734f-0158-b3d4-b97c2a7e7bfb/mzaf_17208889240409861614.plus.aac.p.m4a',
+    previewUrl: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=rain-ambient-10255.mp3',
     genre: 'Ambient',
   },
   {
@@ -69,7 +72,7 @@ export const TRENDING_SONGS: SongTrack[] = [
     title: 'Golden Sunset Vibes',
     artist: 'Acoustic Dreams',
     albumCover: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=300',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview126/v4/c6/3f/14/c63f1489-0820-2565-38b4-55e1c4df68f0/mzaf_16422896585141014522.plus.aac.p.m4a',
+    previewUrl: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=acoustic-guitar-sunset-14088.mp3',
     genre: 'Acoustic',
   },
   {
@@ -77,7 +80,7 @@ export const TRENDING_SONGS: SongTrack[] = [
     title: 'Midnight Synthwave Drive',
     artist: 'Retro Cyber Beats',
     albumCover: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300',
-    previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/58/01/a5/5801a52e-60f2-51ab-85b5-12d8a0c25a07/mzaf_16972051649984920653.plus.aac.p.m4a',
+    previewUrl: 'https://cdn.pixabay.com/download/audio/2022/02/10/audio_b2f913d803.mp3?filename=synthwave-80s-11004.mp3',
     genre: 'Electronic',
   },
 ];

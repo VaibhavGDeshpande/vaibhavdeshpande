@@ -20,6 +20,7 @@ import {
 import supabase from '@/lib/supabase';
 import { useUser } from '@/lib/useUser';
 import type { Photo } from '@/lib/data';
+import { getOptimizedImageUrl } from '@/lib/image';
 import {
   Highlight,
   StorySlide,
@@ -37,6 +38,8 @@ export default function HighlightManager() {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [photoSearch, setPhotoSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   // Form State
   const [isEditing, setIsEditing] = useState(false);
@@ -366,9 +369,10 @@ export default function HighlightManager() {
                         }`}
                       >
                         <Image
-                          src={photo.image_url}
+                          src={getOptimizedImageUrl(photo.image_url, { width: 150, quality: 60 })}
                           alt={photo.title}
                           fill
+                          sizes="80px"
                           className="object-cover"
                         />
                         {coverImage === photo.image_url && (
@@ -383,42 +387,72 @@ export default function HighlightManager() {
               </div>
 
               {/* RIGHT: STORY SLIDES PHOTO SELECTOR */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium flex items-center justify-between">
-                  <span>Select Portfolio Photos for Story Slides ({selectedPhotoIds.length})</span>
+                  <span>Select Story Slides ({selectedPhotoIds.length})</span>
                   <span className="text-[11px] text-neutral-500 font-normal">Click to toggle</span>
                 </span>
 
+                {/* SEARCH & CATEGORY FILTER BAR FOR SLIDE SELECTOR */}
+                <div className="flex gap-2 text-xs">
+                  <input
+                    type="text"
+                    placeholder="Search photos..."
+                    value={photoSearch}
+                    onChange={(e) => setPhotoSearch(e.target.value)}
+                    className="flex-1 p-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none"
+                  />
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="p-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white focus:outline-none"
+                  >
+                    <option value="All">All Categories</option>
+                    {Array.from(new Set(photos.map((p) => p.category).filter(Boolean))).map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <div className="grid grid-cols-3 gap-3 max-h-[350px] overflow-y-auto p-3 bg-neutral-950 rounded-xl border border-neutral-800">
-                  {photos.map((photo) => {
-                    const isSelected = selectedPhotoIds.includes(photo.id);
-                    return (
-                      <div
-                        key={`slide-${photo.id}`}
-                        onClick={() => handleTogglePhotoSelection(photo.id)}
-                        className={`relative aspect-[4/5] rounded-xl overflow-hidden cursor-pointer border-2 transition ${
-                          isSelected
-                            ? 'border-rose-500 ring-2 ring-rose-500/30'
-                            : 'border-neutral-800 opacity-60 hover:opacity-100'
-                        }`}
-                      >
-                        <Image
-                          src={photo.image_url}
-                          alt={photo.title}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-x-0 bottom-0 p-1.5 bg-black/60 text-[10px] text-white truncate">
-                          {photo.title}
-                        </div>
-                        {isSelected && (
-                          <div className="absolute top-2 right-2 bg-rose-600 text-white rounded-full p-1 shadow">
-                            <Check size={12} />
+                  {photos
+                    .filter((photo) => {
+                      const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
+                      const matchesSearch = !photoSearch || photo.title.toLowerCase().includes(photoSearch.toLowerCase());
+                      return matchesCategory && matchesSearch;
+                    })
+                    .map((photo) => {
+                      const isSelected = selectedPhotoIds.includes(photo.id);
+                      return (
+                        <div
+                          key={`slide-${photo.id}`}
+                          onClick={() => handleTogglePhotoSelection(photo.id)}
+                          className={`relative aspect-[4/5] rounded-xl overflow-hidden cursor-pointer border-2 transition ${
+                            isSelected
+                              ? 'border-rose-500 ring-2 ring-rose-500/30'
+                              : 'border-neutral-800 opacity-60 hover:opacity-100'
+                          }`}
+                        >
+                          <Image
+                            src={getOptimizedImageUrl(photo.image_url, { width: 250, quality: 60 })}
+                            alt={photo.title}
+                            fill
+                            sizes="150px"
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 p-1.5 bg-black/60 text-[10px] text-white truncate">
+                            {photo.title}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 bg-rose-600 text-white rounded-full p-1 shadow">
+                              <Check size={12} />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
             </div>
@@ -441,9 +475,10 @@ export default function HighlightManager() {
                         >
                           <div className="relative w-16 h-20 rounded-lg overflow-hidden shrink-0">
                             <Image
-                              src={photo.image_url}
+                              src={getOptimizedImageUrl(photo.image_url, { width: 200, quality: 60 })}
                               alt={photo.title}
                               fill
+                              sizes="80px"
                               className="object-cover"
                             />
                           </div>
@@ -517,9 +552,10 @@ export default function HighlightManager() {
                   <div className="relative p-[2px] rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0">
                     <div className="relative w-14 h-14 rounded-full overflow-hidden bg-neutral-950">
                       <Image
-                        src={highlight.coverImage}
+                        src={getOptimizedImageUrl(highlight.coverImage, { width: 150, quality: 60 })}
                         alt={highlight.title}
                         fill
+                        sizes="60px"
                         className="object-cover"
                       />
                     </div>
