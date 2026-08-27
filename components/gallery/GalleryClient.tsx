@@ -31,6 +31,10 @@ export default function GalleryClient({ photos }: GalleryClientProps) {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
+  const availableCategories = useMemo(() => {
+    return Array.from(new Set(photos.map((p) => p.category).filter(Boolean)));
+  }, [photos]);
+
   const filteredPhotos = filter === 'All' ? photos : photos.filter((p) => p.category === filter);
 
   return (
@@ -43,7 +47,11 @@ export default function GalleryClient({ photos }: GalleryClientProps) {
             <p className="mt-2 text-xs uppercase tracking-[0.24em] text-stone-500">{filteredPhotos.length} photographs</p>
           </div>
 
-          <CategoryFilter activeCategory={filter} onCategoryChange={handleFilterChange} />
+          <CategoryFilter
+            activeCategory={filter}
+            onCategoryChange={handleFilterChange}
+            availableCategories={availableCategories}
+          />
         </div>
 
         <div className="mt-8 columns-1 gap-4 sm:columns-2 sm:gap-6 lg:columns-3">

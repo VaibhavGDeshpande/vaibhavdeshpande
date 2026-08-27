@@ -15,22 +15,34 @@ export default function AdminDashboard({ photos }: { photos: Photo[] }) {
 
     setLoadingId(photo.id);
 
-    // 1️⃣ Delete from storage
-    const path = photo.image_url.split('/photos/')[1];
+    try {
+      // 1️⃣ Delete from storage
+      const path = photo.image_url.split('/photos/')[1];
 
-    await supabase.storage
-      .from('photos')
-      .remove([path]);
+      await supabase.storage
+        .from('photos')
+        .remove([path]);
 
-    // 2️⃣ Delete from DB
-    await supabase
-      .from('photos')
-      .delete()
-      .eq('id', photo.id);
+      // 2️⃣ Delete from DB
+      await supabase
+        .from('photos')
+        .delete()
+        .eq('id', photo.id);
 
-    // 3️⃣ Update UI
-    setItems((prev) => prev.filter((p) => p.id !== photo.id));
-    setLoadingId(null);
+      // 3️⃣ Revalidate main website cache
+      try {
+        await fetch('/api/revalidate', { method: 'POST' });
+      } catch (e) {
+        console.error('Revalidation error:', e);
+      }
+
+      // 4️⃣ Update UI
+      setItems((prev) => prev.filter((p) => p.id !== photo.id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+    } finally {
+      setLoadingId(null);
+    }
   };
 
   return (

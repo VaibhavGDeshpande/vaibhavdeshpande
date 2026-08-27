@@ -17,16 +17,7 @@ import { unstable_cache } from 'next/cache';
 //   opening: 4,
 // };
 
-export type Category =
-  | 'Animals'
-  | 'Bike'
-  | 'Nature'
-  | 'Moon'
-  | 'Pune Grand Tour'
-  | 'Sky'
-  | 'Space'
-  | 'Sun'
-  | 'Nature';
+export type Category = string;
 
 export interface Photo {
   id: string;

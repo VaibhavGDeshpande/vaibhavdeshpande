@@ -9,19 +9,37 @@ interface CategoryFilterProps {
   onCategoryChange: (category: FilterCategory) => void;
 }
 
-const categories: { value: FilterCategory; label: string }[] = [
-  { value: 'All', label: 'All' },
-  { value: 'Animals', label: 'Animals' },
-  { value: 'Bike', label: 'Bike' },
-  { value: 'Nature', label: 'Nature' },
-  { value: 'Moon', label: 'Moon' },
-  { value: 'Pune Grand Tour', label: 'Pune Grand Tour' },
-  { value: 'Sky', label: 'Sky' },
-  { value: 'Space', label: 'Space' },
-  { value: 'Sun', label: 'Sun' },
+const DEFAULT_CATEGORIES = [
+  'Animals',
+  'Bike',
+  'Nature',
+  'Moon',
+  'Pune Grand Tour',
+  'Sky',
+  'Space',
+  'Sun',
 ];
 
-export default function CategoryFilter({ activeCategory, onCategoryChange }: CategoryFilterProps) {
+interface CategoryFilterProps {
+  activeCategory: FilterCategory;
+  onCategoryChange: (category: FilterCategory) => void;
+  availableCategories?: string[];
+}
+
+export default function CategoryFilter({
+  activeCategory,
+  onCategoryChange,
+  availableCategories,
+}: CategoryFilterProps) {
+  const categoryList = availableCategories?.length
+    ? Array.from(new Set([...DEFAULT_CATEGORIES, ...availableCategories]))
+    : DEFAULT_CATEGORIES;
+
+  const categories: { value: FilterCategory; label: string }[] = [
+    { value: 'All', label: 'All' },
+    ...categoryList.map((cat) => ({ value: cat, label: cat })),
+  ];
+
   return (
     <div className="w-full overflow-x-auto pb-1">
       <div className="flex w-max items-center gap-2 sm:mx-auto sm:w-full sm:flex-wrap sm:justify-center sm:gap-3">
