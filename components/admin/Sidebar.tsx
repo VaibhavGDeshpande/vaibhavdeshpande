@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, Upload, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, Upload, Sparkles, ArrowLeft } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Gallery', href: '/admin/gallery', icon: ImageIcon },
   { name: 'Upload', href: '/admin/upload-image', icon: Upload },
+  { name: 'Highlights', href: '/admin/highlights', icon: Sparkles },
 ];
 
 export default function Sidebar() {
