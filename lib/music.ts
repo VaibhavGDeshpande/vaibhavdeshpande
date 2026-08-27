@@ -3,8 +3,23 @@ export interface SongTrack {
   title: string;
   artist: string;
   albumCover: string;
-  previewUrl: string; // 30-second audio preview clip
+  previewUrl: string; // Native audio URL or youtube embed URL
+  youtubeId?: string; // YouTube Video ID (e.g. dQw4w9WgXcQ)
   genre?: string;
+  startTime?: number; // Custom start point in seconds (e.g. 12)
+  endTime?: number;   // Custom end point in seconds (e.g. 28)
+  duration?: number; // Total audio duration in seconds
+  snippetDuration?: number; // Calculated snippet length (endTime - startTime)
+}
+
+/**
+ * Extracts YouTube Video ID from any YouTube URL (watch, short, embed, or share link)
+ */
+export function extractYouTubeId(url: string): string | null {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.trim().match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
 }
 
 /**

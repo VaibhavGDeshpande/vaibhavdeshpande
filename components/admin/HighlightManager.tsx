@@ -334,8 +334,13 @@ export default function HighlightManager() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-medium text-white truncate">
-                          {selectedSong.title}
+                        <h4 className="text-xs font-medium text-white truncate flex items-center gap-2">
+                          <span>{selectedSong.title}</span>
+                          {typeof selectedSong.startTime === 'number' && (
+                            <span className="text-[10px] px-1.5 py-0.5 bg-rose-950 text-rose-300 border border-rose-800 rounded font-mono">
+                              0:{selectedSong.startTime < 10 ? `0${selectedSong.startTime}` : selectedSong.startTime} ➔ 0:{selectedSong.endTime ? (selectedSong.endTime < 10 ? `0${selectedSong.endTime}` : selectedSong.endTime) : (selectedSong.startTime + 15)}
+                            </span>
+                          )}
                         </h4>
                         <p className="text-[11px] text-neutral-400 truncate">
                           {selectedSong.artist}
@@ -347,7 +352,7 @@ export default function HighlightManager() {
                       onClick={() => setIsMusicModalOpen(true)}
                       className="px-3.5 py-2 bg-rose-600/20 text-rose-300 border border-rose-600/40 rounded-lg text-xs font-medium hover:bg-rose-600/30 transition shrink-0"
                     >
-                      Search Music
+                      Search & Scrub Song
                     </button>
                   </div>
                 </div>

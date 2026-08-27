@@ -112,6 +112,10 @@ export default function StoryViewerModal({
     audio.muted = false;
     setIsMuted(false);
 
+    if (typeof currentHighlight.song.startTime === 'number' && audio.currentTime < currentHighlight.song.startTime) {
+      audio.currentTime = currentHighlight.song.startTime;
+    }
+
     audio
       .play()
       .then(() => {
@@ -121,7 +125,7 @@ export default function StoryViewerModal({
       .catch((err) => {
         console.log('Audio play error:', err);
       });
-  }, [currentHighlight?.song?.previewUrl]);
+  }, [currentHighlight?.song?.previewUrl, currentHighlight?.song?.startTime]);
 
   /* ---------------------------------------------
      Audio Control
@@ -133,6 +137,10 @@ export default function StoryViewerModal({
     audio.src = currentHighlight.song.previewUrl;
     audio.load();
     audio.muted = isMuted;
+
+    if (typeof currentHighlight.song.startTime === 'number') {
+      audio.currentTime = currentHighlight.song.startTime;
+    }
 
     const playPromise = audio.play();
     if (playPromise !== undefined) {
@@ -183,22 +191,41 @@ export default function StoryViewerModal({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [goToNextSlide, goToPrevSlide, onClose]);
 
+  const handleTimeUpdate = () => {
+    if (!audioRef.current || !currentHighlight?.song) return;
+    const startTime = currentHighlight.song.startTime || 0;
+    const endTime = currentHighlight.song.endTime || (startTime + (currentHighlight.song.snippetDuration || 15));
+
+    if (audioRef.current.currentTime >= endTime || audioRef.current.currentTime < startTime) {
+      audioRef.current.currentTime = startTime;
+    }
+  };
+
   if (!currentHighlight || !currentSlide) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl transition-all">
-      <audio
-        ref={audioRef}
-        loop
-        onError={() => {
-          console.warn('Audio URL 404/Error. Falling back to working audio stream.');
-          if (audioRef.current && TRENDING_SONGS[0]?.previewUrl) {
-            audioRef.current.src = TRENDING_SONGS[0].previewUrl;
-            audioRef.current.load();
-            audioRef.current.play().catch(() => {});
-          }
-        }}
-      />
+      {currentHighlight.song?.youtubeId ? (
+        <iframe
+          className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
+          src={`https://www.youtube.com/embed/${currentHighlight.song.youtubeId}?autoplay=1&loop=1&playlist=${currentHighlight.song.youtubeId}&start=${currentHighlight.song.startTime || 0}&end=${currentHighlight.song.endTime || (currentHighlight.song.startTime || 0) + 15}&enablejsapi=1`}
+          allow="autoplay"
+        />
+      ) : (
+        <audio
+          ref={audioRef}
+          loop
+          onTimeUpdate={handleTimeUpdate}
+          onError={() => {
+            console.warn('Audio URL 404/Error. Falling back to working audio stream.');
+            if (audioRef.current && TRENDING_SONGS[0]?.previewUrl) {
+              audioRef.current.src = TRENDING_SONGS[0].previewUrl;
+              audioRef.current.load();
+              audioRef.current.play().catch(() => {});
+            }
+          }}
+        />
+      )}
 
       {/* BACKGROUND CLOSE TAP AREA */}
       <div className="absolute inset-0 z-0" onClick={onClose} />

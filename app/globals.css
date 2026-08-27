@@ -12,6 +12,12 @@
   --accent: #f5cc8f;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 html,
 body {
   background: radial-gradient(circle at 15% 20%, rgba(245, 204, 143, 0.11), transparent 35%),

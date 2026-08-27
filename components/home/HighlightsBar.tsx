@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Music, Sparkles } from 'lucide-react';
+import { getOptimizedImageUrl } from '@/lib/image';
 import { DEFAULT_HIGHLIGHTS, getStoredHighlights, Highlight } from '@/lib/highlightsData';
 import StoryViewerModal from './StoryViewerModal';
 
@@ -44,7 +45,7 @@ export default function HighlightsBar() {
                   <div className="p-0.5 bg-neutral-950 rounded-full">
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden">
                       <Image
-                        src={highlight.coverImage}
+                        src={getOptimizedImageUrl(highlight.coverImage, { width: 160, quality: 60 })}
                         alt={highlight.title}
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
