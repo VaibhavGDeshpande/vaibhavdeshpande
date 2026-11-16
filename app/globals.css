@@ -37,6 +37,25 @@ body::before {
   z-index: 1;
 }
 
+body:has(.admin-shell),
+body:has(.admin-login-shell) {
+  background: #11110f;
+  color: #f4f1e9;
+  overflow-x: clip;
+}
+
+html:has(.admin-shell),
+html:has(.admin-login-shell) {
+  overflow-x: clip;
+}
+
+body:has(.admin-shell)::before,
+body:has(.admin-login-shell)::before,
+.site-frame:has(.admin-shell)::before,
+.site-frame:has(.admin-login-shell)::before {
+  display: none;
+}
+
 @layer components {
   .site-frame {
     @apply relative isolate;

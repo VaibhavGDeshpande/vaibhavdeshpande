@@ -1,5 +1,6 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import '../darkroom/home.css';
 
 export default function PublicLayout({
   children,

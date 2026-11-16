@@ -4,9 +4,41 @@
 import { useState, useEffect, useMemo } from 'react';
 import supabase from '@/lib/supabase';
 import { useUser } from '@/lib/useUser';
-import { FolderPlus, FileCode, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { VARIANT_WIDTHS, variantPath } from '@/lib/imageVariants';
 
 type Dimensions = { w: number; h: number };
+
+/** Resize in the browser and upload one WebP copy per width, beside the original. */
+async function uploadVariants(source: Blob, originalPath: string) {
+  const bitmap = await createImageBitmap(source);
+  try {
+    for (const width of VARIANT_WIDTHS) {
+      const w = Math.min(width, bitmap.width);
+      const h = Math.round((bitmap.height * w) / bitmap.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas 2D context unavailable');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('WebP encode failed'))), 'image/webp', 0.74)
+      );
+      const { error } = await supabase.storage
+        .from('photos')
+        .upload(variantPath(originalPath, width), blob, {
+          upsert: true,
+          contentType: 'image/webp',
+          cacheControl: '31536000',
+        });
+      if (error) throw error;
+    }
+  } finally {
+    bitmap.close();
+  }
+}
 
 const DEFAULT_CATEGORIES = [
   'Animals',
@@ -119,8 +151,8 @@ export default function UploadImage() {
 
   if (!user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-neutral-500">
-        Login required
+      <div className="a-wait">
+        Sign in to upload photographs.
       </div>
     );
   }
@@ -230,6 +262,18 @@ export default function UploadImage() {
 
       if (uploadError) throw uploadError;
 
+      /* -----------------------------
+         Pre-made WebP copies (lib/imageVariants.ts)
+         Best effort: the original is already saved, so a failed copy
+         only means the site serves the original for that size.
+      ----------------------------- */
+      setProgress(80);
+      try {
+        await uploadVariants(jpgBlob, filePath);
+      } catch (variantError) {
+        console.error('WebP copy upload failed:', variantError);
+      }
+
       setProgress(90);
 
       /* -----------------------------
@@ -261,7 +305,7 @@ export default function UploadImage() {
       setProgress(100);
       setStatusMessage({
         type: 'success',
-        text: `Successfully uploaded "${photoTitle}" to storage at "${filePath}" 🎉`,
+        text: `Uploaded “${photoTitle}” to photos/${filePath}.`,
       });
 
       // Update local categories list if new category was created
@@ -287,199 +331,151 @@ export default function UploadImage() {
   };
 
   return (
-    <section className="pt-28 pb-16 px-6 md:px-12 bg-neutral-950 min-h-screen">
-      {/* HEADER */}
-      <header className="mb-10 max-w-6xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-serif text-neutral-200">
-          Upload Photography
-        </h1>
-        <p className="text-sm text-neutral-500 mt-2">
-          Add photographs to your portfolio with customizable categories and file naming conventions.
-        </p>
+    <section className="a-page" aria-labelledby="upload-title">
+      <header className="a-head">
+        <div>
+          <h1 id="upload-title">Upload</h1>
+          <p>Add a photograph to a collection. It appears on the site once saved.</p>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-        {/* LEFT — FORM */}
-        <div className="space-y-6">
-          {/* Status Alert */}
+      <div className="a-split">
+        {/* FORM */}
+        <div className="a-stack">
           {statusMessage && (
-            <div
-              className={`p-4 rounded-xl border flex items-start gap-3 text-sm ${
-                statusMessage.type === 'success'
-                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-                  : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-              }`}
-            >
+            <div role="status" className={`a-status a-status--${statusMessage.type}`}>
               {statusMessage.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
+                <CheckCircle2 size={16} strokeWidth={1.5} aria-hidden="true" />
               ) : (
-                <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+                <AlertCircle size={16} strokeWidth={1.5} aria-hidden="true" />
               )}
-              <div>{statusMessage.text}</div>
+              <span className="a-status__text">{statusMessage.text}</span>
             </div>
           )}
 
-          {/* FILE INPUT */}
-          <label className="block">
-            <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
-              Image File
-            </span>
+          <label className="a-field">
+            <span className="a-label">Image file</span>
             <input
               type="file"
               accept="image/*"
+              className="a-file"
               onChange={(e) => {
                 setStatusMessage(null);
                 setFile(e.target.files?.[0] ?? null);
               }}
-              className="mt-2 block w-full text-sm text-neutral-300
-                         file:mr-4 file:py-2.5 file:px-4
-                         file:rounded-lg file:border-0
-                         file:bg-neutral-800 file:text-neutral-200
-                         hover:file:bg-neutral-700 transition"
             />
           </label>
 
-          {/* TITLE INPUT */}
-          <label className="block">
-            <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
-              Photo Title
-            </span>
+          <label className="a-field">
+            <span className="a-label">Title</span>
             <input
               type="text"
-              placeholder="e.g. Sunset Over Fort"
+              className="a-input"
+              placeholder="e.g. Sunset over the fort"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-2 w-full p-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition text-sm"
             />
           </label>
 
-          {/* CATEGORY SELECT & CREATION */}
-          <div className="space-y-3">
-            <label className="block">
-              <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium flex items-center gap-1.5">
-                <FolderPlus size={14} className="text-neutral-500" />
-                Category
-              </span>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="mt-2 w-full p-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white focus:outline-none focus:border-neutral-600 transition text-sm"
-              >
-                {categoriesList.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-                <option value="__NEW__" className="text-amber-400 font-medium">
-                  + Create New Category...
+          <label className="a-field">
+            <span className="a-label">Collection</span>
+            <select
+              className="a-input"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {categoriesList.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
                 </option>
-              </select>
-            </label>
+              ))}
+              <option value="__NEW__">Create a collection…</option>
+            </select>
+          </label>
 
-            {/* Custom Category Input when selectedCategory === '__NEW__' */}
-            {selectedCategory === '__NEW__' && (
-              <div className="p-4 bg-neutral-900/80 border border-neutral-800 rounded-xl space-y-2">
-                <span className="text-xs text-amber-400 font-medium block">
-                  New Category Name
-                </span>
-                <input
-                  type="text"
-                  placeholder="e.g. Architecture, Wildlife"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  className="w-full p-3 bg-neutral-950 border border-neutral-700 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500/50 transition text-sm"
-                />
-                <p className="text-[11px] text-neutral-500">
-                  This will create a new collection category and folder in storage.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* CUSTOM FILENAME INPUT */}
-          <div className="space-y-2">
-            <label className="block">
-              <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium flex items-center gap-1.5">
-                <FileCode size={14} className="text-neutral-500" />
-                Custom Storage Filename (Optional)
-              </span>
+          {selectedCategory === '__NEW__' && (
+            <label className="a-field">
+              <span className="a-label">New collection name</span>
               <input
                 type="text"
-                placeholder="e.g. sunset-in-pune"
-                value={customFileName}
-                onChange={(e) => setCustomFileName(e.target.value)}
-                className="mt-2 w-full p-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 transition text-sm"
+                className="a-input"
+                placeholder="e.g. Architecture"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
               />
+              <span className="a-help">This creates a new collection and a folder in storage.</span>
             </label>
-            <p className="text-[11px] text-neutral-500">
-              Leave blank to use default sequential numbering (e.g. <code className="text-neutral-400">1.jpg</code>, <code className="text-neutral-400">2.jpg</code>).
-            </p>
-          </div>
+          )}
 
-          {/* STORAGE PATH PREVIEW BADGE */}
-          <div className="p-3.5 bg-neutral-900/60 border border-neutral-800 rounded-xl flex items-start gap-2.5 text-xs text-neutral-400">
-            <Info size={16} className="text-neutral-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-medium text-neutral-300">Storage Naming Convention:</span>
-              <div className="mt-1 font-mono text-emerald-400 bg-neutral-950 px-2.5 py-1 rounded border border-neutral-800/80 inline-block text-[12px]">
-                photos/{storagePathPreview}
-              </div>
-            </div>
+          <label className="a-field">
+            <span className="a-label">Storage file name (optional)</span>
+            <input
+              type="text"
+              className="a-input"
+              placeholder="e.g. sunset-in-pune"
+              value={customFileName}
+              onChange={(e) => setCustomFileName(e.target.value)}
+            />
+            <span className="a-help">Leave blank to number it after the last photograph in the collection.</span>
+          </label>
+
+          <div className="a-path">
+            <span className="a-help">Saved as</span>
+            <code>photos/{storagePathPreview}</code>
           </div>
 
           {loading && (
-            <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-white h-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
+            <div
+              className="a-progress"
+              role="progressbar"
+              aria-label="Upload progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
+              <span style={{ transform: `scaleX(${progress / 100})` }} />
             </div>
           )}
 
-          <button
-            onClick={handleUpload}
-            disabled={!file || loading}
-            className="w-full mt-2 py-3.5 bg-white text-black font-medium text-xs uppercase tracking-widest rounded-lg disabled:opacity-40 hover:bg-neutral-200 transition"
-          >
-            {loading ? `Uploading (${progress}%)…` : 'Upload Photograph'}
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={handleUpload}
+              disabled={!file || loading}
+              aria-busy={loading}
+              className="a-btn a-btn--primary"
+            >
+              {loading ? `Uploading, ${progress}%` : 'Upload photograph'}
+            </button>
+          </div>
         </div>
 
-        {/* RIGHT — PREVIEW */}
-        <div className="flex flex-col items-center justify-start">
-          <span className="text-xs uppercase tracking-widest text-neutral-500 mb-2 w-full text-left font-medium">
-            Image Preview
-          </span>
+        {/* PREVIEW */}
+        <div className="a-preview">
+          <span className="a-label">Preview</span>
           {previewUrl ? (
-            <div className="w-full bg-neutral-900 border border-neutral-800 rounded-xl p-4 flex flex-col items-center">
-              <div className="relative w-full max-h-[400px] flex items-center justify-center overflow-hidden rounded-lg bg-neutral-950">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="max-h-[380px] w-auto object-contain rounded-md"
-                />
+            <>
+              <div className="a-preview__frame">
+                <img src={previewUrl} alt="Preview of the selected file" />
               </div>
-
               {dimensions && (
-                <div className="mt-4 flex items-center justify-between w-full text-xs text-neutral-400 border-t border-neutral-800 pt-3">
-                  <span>Dimensions:</span>
-                  <span className="font-mono text-neutral-200">
+                <dl>
+                  <dt>Dimensions</dt>
+                  <dd>
                     {dimensions.w} × {dimensions.h} px
-                  </span>
-                </div>
+                  </dd>
+                </dl>
               )}
-
-              <button
-                onClick={() => setFile(null)}
-                className="mt-3 text-xs uppercase tracking-widest text-neutral-400 hover:text-white transition"
-              >
-                Replace File
-              </button>
-            </div>
+              <div>
+                <button type="button" onClick={() => setFile(null)} className="a-btn a-btn--sm">
+                  Replace file
+                </button>
+              </div>
+            </>
           ) : (
-            <div className="w-full h-72 border border-dashed border-neutral-800 rounded-xl flex flex-col items-center justify-center text-neutral-500 p-6 text-center text-sm">
-              <p className="text-neutral-400 font-medium">No image selected</p>
-              <p className="text-xs text-neutral-600 mt-1">Select an image file on the left to preview it here.</p>
+            <div className="a-empty">
+              <p>No image selected</p>
+              <p>Choose a file to see it here before you upload.</p>
             </div>
           )}
         </div>
@@ -487,4 +483,3 @@ export default function UploadImage() {
     </section>
   );
 }
-

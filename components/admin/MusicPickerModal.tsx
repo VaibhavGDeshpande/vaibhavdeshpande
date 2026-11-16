@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { Search, Play, Pause, X, Music, Check, Sparkles, SlidersHorizontal, Volume2, Upload, Link, FileAudio } from 'lucide-react';
+import { Search, Play, Pause, X, Music, Upload, Link as LinkIcon, FileAudio } from 'lucide-react';
 import { searchMusic, SongTrack, TRENDING_SONGS, extractYouTubeId } from '@/lib/music';
 
 interface MusicPickerModalProps {
@@ -239,152 +239,132 @@ export default function MusicPickerModal({
 
   if (!isOpen) return null;
 
+  const closePicker = () => {
+    if (audioRef.current) audioRef.current.pause();
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+    <div
+      className="a-dialog"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') closePicker();
+      }}
+    >
       <audio
         ref={audioRef}
         onLoadedMetadata={handleLoadedMetadata}
         onTimeUpdate={handleModalTimeUpdate}
       />
 
-      <div className="w-full max-w-lg bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
-        {/* HEADER */}
-        <div className="p-5 border-b border-neutral-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Music className="text-rose-400" size={18} />
-            <h3 className="font-semibold text-white text-base">
-              Custom Song Start & End Selector
-            </h3>
-          </div>
-          <button
-            onClick={() => {
-              if (audioRef.current) audioRef.current.pause();
-              onClose();
-            }}
-            className="p-1.5 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
-          >
-            <X size={18} />
+      <div className="a-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="song-picker-title">
+        <div className="a-dialog__head">
+          <h2 id="song-picker-title">Choose a song snippet</h2>
+          <button type="button" onClick={closePicker} className="a-btn a-btn--icon" aria-label="Close song picker">
+            <X size={16} strokeWidth={1.5} aria-hidden="true" />
           </button>
         </div>
 
-        {/* TAB SWITCHER */}
-        <div className="flex border-b border-neutral-800 bg-neutral-950 text-xs">
+        <div className="a-tabs" role="tablist" aria-label="Song source">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'search'}
             onClick={() => setActiveTab('search')}
-            className={`flex-1 py-3 font-semibold transition border-b-2 flex items-center justify-center gap-1.5 ${
-              activeTab === 'search'
-                ? 'border-rose-500 text-white bg-rose-950/20'
-                : 'border-transparent text-neutral-400 hover:text-neutral-200'
-            }`}
+            className="a-tab"
           >
-            <Music size={14} /> Search Online Library
+            <Music size={16} strokeWidth={1.5} aria-hidden="true" />
+            Search the library
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'custom'}
             onClick={() => setActiveTab('custom')}
-            className={`flex-1 py-3 font-semibold transition border-b-2 flex items-center justify-center gap-1.5 ${
-              activeTab === 'custom'
-                ? 'border-rose-500 text-white bg-rose-950/20'
-                : 'border-transparent text-neutral-400 hover:text-neutral-200'
-            }`}
+            className="a-tab"
           >
-            <Upload size={14} /> Upload Custom Full Song (MP3)
+            <Upload size={16} strokeWidth={1.5} aria-hidden="true" />
+            Your own MP3
           </button>
         </div>
 
-        {/* TAB 1: SEARCH BAR */}
         {activeTab === 'search' && (
-          <div className="p-4 border-b border-neutral-800/80 bg-neutral-950">
-            <div className="relative flex items-center">
-              <Search className="absolute left-3 text-neutral-500" size={16} />
+          <div className="a-dialog__block">
+            <label className="visually-hidden" htmlFor="song-search">Search songs</label>
+            <span className="a-search">
+              <Search size={16} strokeWidth={1.5} aria-hidden="true" />
               <input
-                type="text"
-                placeholder="Search any song, artist, or genre (e.g. Kesariya, Blinding Lights, Lofi)..."
+                id="song-search"
+                type="search"
+                className="a-input"
+                placeholder="Song, artist or genre, e.g. Kesariya, lofi"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 bg-neutral-900 border border-neutral-800 rounded-xl text-white text-xs placeholder-neutral-500 focus:outline-none focus:border-rose-500/50 transition"
               />
-            </div>
-            <p className="mt-2 text-[11px] text-neutral-500 flex items-center gap-1">
-              <Sparkles size={11} className="text-amber-400" />
-              Set exact custom Start Point & End Point for your story snippet
-            </p>
+            </span>
+            <p className="a-help">Pick a song, then set where its snippet starts and ends.</p>
           </div>
         )}
 
-        {/* TAB 2: CUSTOM MP3 UPLOAD & URL */}
         {activeTab === 'custom' && (
-          <div className="p-4 border-b border-neutral-800/80 bg-neutral-950 space-y-3">
+          <div className="a-dialog__block">
             <input
               type="file"
               ref={fileInputRef}
               accept="audio/*"
-              className="hidden"
+              hidden
               onChange={handleFileUpload}
             />
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 py-3 px-4 bg-rose-600/20 text-rose-300 border border-rose-600/40 rounded-xl text-xs font-semibold hover:bg-rose-600/30 transition flex items-center justify-center gap-2"
-              >
-                <FileAudio size={16} />
-                Upload Full MP3 File
+            <div>
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="a-btn">
+                <FileAudio size={16} strokeWidth={1.5} aria-hidden="true" />
+                Choose an MP3 file
               </button>
             </div>
-
-            <div className="relative flex items-center gap-2">
-              <Link className="absolute left-3 text-neutral-500" size={14} />
+            <div className="a-row">
+              <label className="visually-hidden" htmlFor="song-url">MP3 link</label>
               <input
-                type="text"
-                placeholder="Or paste direct Full Song MP3 link (e.g. https://.../fullsong.mp3)"
+                id="song-url"
+                type="url"
+                className="a-input"
+                placeholder="Or paste a direct link to an MP3"
                 value={customUrl}
                 onChange={(e) => setCustomUrl(e.target.value)}
-                className="w-full pl-8 pr-20 py-2 bg-neutral-900 border border-neutral-800 rounded-xl text-white text-xs placeholder-neutral-500 focus:outline-none"
               />
-              <button
-                onClick={handleLoadCustomUrl}
-                className="absolute right-1 px-3 py-1 bg-neutral-800 text-white rounded-lg text-xs font-medium hover:bg-neutral-700 transition"
-              >
+              <button type="button" onClick={handleLoadCustomUrl} className="a-btn">
+                <LinkIcon size={16} strokeWidth={1.5} aria-hidden="true" />
                 Load
               </button>
             </div>
           </div>
         )}
 
-        {/* ACTIVE SONG INSTAGRAM DUAL SCRUBBER PANEL */}
         {activeSong && (
-          <div className="p-4 bg-gradient-to-r from-rose-950/40 via-neutral-950 to-neutral-950 border-b border-neutral-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-neutral-800 shadow-md">
-                  <Image
-                    src={activeSong.albumCover}
-                    alt={activeSong.title}
-                    fill
-                    className="object-cover"
-                  />
+          <div className="a-dialog__block">
+            <div className="a-song" style={{ border: 0, padding: 0 }}>
+              <div className="a-song__info">
+                <span className="a-cover">
+                  <Image src={activeSong.albumCover} alt="" fill sizes="48px" />
                   <button
+                    type="button"
                     onClick={handleTogglePlay}
-                    className="absolute inset-0 bg-black/40 hover:bg-black/60 flex items-center justify-center text-white transition"
+                    aria-label={isPlaying ? `Pause ${activeSong.title}` : `Play ${activeSong.title}`}
                   >
-                    {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                    {isPlaying ? (
+                      <Pause size={16} strokeWidth={1.5} aria-hidden="true" />
+                    ) : (
+                      <Play size={16} strokeWidth={1.5} aria-hidden="true" />
+                    )}
                   </button>
-                </div>
-
-                <div className="min-w-0">
-                  <span className="text-[10px] uppercase tracking-widest text-rose-400 font-semibold flex items-center gap-1">
-                    <SlidersHorizontal size={11} /> Custom Start & End Point
-                  </span>
-                  <h4 className="text-xs font-semibold text-white truncate">
-                    {activeSong.title}
-                  </h4>
-                  <p className="text-[11px] text-neutral-400 truncate">
-                    {activeSong.artist}
-                  </p>
-                </div>
+                </span>
+                <span className="a-cell-title">
+                  <b>{activeSong.title}</b>
+                  <span>{activeSong.artist}</span>
+                </span>
               </div>
 
               <button
+                type="button"
                 onClick={() => {
                   if (audioRef.current) audioRef.current.pause();
                   onSelectSong({
@@ -396,42 +376,33 @@ export default function MusicPickerModal({
                   });
                   onClose();
                 }}
-                className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-rose-500 transition shadow-lg shrink-0"
+                className="a-btn a-btn--primary"
               >
-                Use Snippet ({endTime - startTime}s)
+                Use {endTime - startTime}s snippet
               </button>
             </div>
 
-            {/* PRESET QUICK LENGTH BUTTONS */}
-            <div className="flex items-center justify-between pt-1 text-xs">
-              <span className="text-[11px] text-neutral-400 font-mono">
-                Quick Presets:
-              </span>
-              <div className="flex items-center gap-1.5">
-                {[5, 10, 15, 30].map((dur) => (
-                  <button
-                    key={dur}
-                    onClick={() => handleQuickPreset(dur)}
-                    className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-semibold transition ${
-                      endTime - startTime === dur
-                        ? 'bg-rose-600 text-white'
-                        : 'bg-neutral-800 text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    +{dur}s
-                  </button>
-                ))}
-              </div>
+            <div className="a-presets">
+              <span>Length</span>
+              {[5, 10, 15, 30].map((dur) => (
+                <button
+                  type="button"
+                  key={dur}
+                  onClick={() => handleQuickPreset(dur)}
+                  aria-pressed={endTime - startTime === dur}
+                  className="a-btn a-btn--sm"
+                >
+                  {dur}s
+                </button>
+              ))}
             </div>
 
-            {/* START & END DUAL RANGE SLIDERS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {/* START POINT CONTROL */}
-              <div className="space-y-1 bg-neutral-900/90 p-2.5 rounded-xl border border-neutral-800">
-                <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-neutral-400">Start Point:</span>
-                  <span className="text-emerald-400 font-bold">{formatTime(startTime)}</span>
-                </div>
+            <div className="a-ranges">
+              <label className="a-range">
+                <span className="a-range__top">
+                  Start
+                  <b>{formatTime(startTime)}</b>
+                </span>
                 <input
                   type="range"
                   min="0"
@@ -439,16 +410,13 @@ export default function MusicPickerModal({
                   step="1"
                   value={startTime}
                   onChange={(e) => handleStartChange(Number(e.target.value))}
-                  className="w-full accent-emerald-500 bg-neutral-800 h-1.5 rounded cursor-pointer"
                 />
-              </div>
-
-              {/* END POINT CONTROL */}
-              <div className="space-y-1 bg-neutral-900/90 p-2.5 rounded-xl border border-neutral-800">
-                <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-neutral-400">End Point:</span>
-                  <span className="text-rose-400 font-bold">{formatTime(endTime)}</span>
-                </div>
+              </label>
+              <label className="a-range">
+                <span className="a-range__top">
+                  End
+                  <b>{formatTime(endTime)}</b>
+                </span>
                 <input
                   type="range"
                   min="1"
@@ -456,40 +424,28 @@ export default function MusicPickerModal({
                   step="1"
                   value={endTime}
                   onChange={(e) => handleEndChange(Number(e.target.value))}
-                  className="w-full accent-rose-500 bg-neutral-800 h-1.5 rounded cursor-pointer"
                 />
-              </div>
+              </label>
             </div>
 
-            {/* LIVE SEGMENT SUMMARY */}
-            <div className="flex justify-between items-center text-[11px] text-neutral-400 font-mono bg-neutral-950 p-2 rounded-lg border border-neutral-800/80">
-              <span className="flex items-center gap-1.5 text-rose-400 font-semibold">
-                <Volume2 size={12} /> Playing Snippet Loop:
-              </span>
-              <span className="text-white font-bold">
-                {formatTime(startTime)} ➔ {formatTime(endTime)} ({endTime - startTime}s length)
-              </span>
-            </div>
+            <p className="a-summary" aria-live="polite">
+              Plays from {formatTime(startTime)} to {formatTime(endTime)}, {endTime - startTime} seconds, on a loop.
+            </p>
 
-            {/* YOUTUBE IFRAME PLAYER PREVIEW IF YOUTUBE LINK */}
             {activeSong.youtubeId && (
-              <div className="relative w-full h-44 rounded-xl overflow-hidden border border-neutral-800 bg-black">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1&start=${startTime}&end=${endTime}&enablejsapi=1`}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                />
-              </div>
+              <iframe
+                className="a-embed"
+                title={`YouTube preview of ${activeSong.title}`}
+                src={`https://www.youtube.com/embed/${activeSong.youtubeId}?autoplay=1&start=${startTime}&end=${endTime}&enablejsapi=1`}
+                allow="autoplay; encrypted-media; picture-in-picture"
+              />
             )}
           </div>
         )}
 
-        {/* SONG LIST */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+        <div className="a-songs">
           {loading ? (
-            <div className="p-8 text-center text-xs text-neutral-500">
-              Searching music library...
-            </div>
+            <p className="a-help" role="status">Searching the library…</p>
           ) : songs.length > 0 ? (
             songs.map((song) => {
               const isCurrentActive = activeSong?.id === song.id;
@@ -499,67 +455,48 @@ export default function MusicPickerModal({
                 <div
                   key={song.id}
                   onClick={() => handleSelectActiveSong(song)}
-                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition ${
-                    isCurrentActive
-                      ? 'bg-rose-950/40 border-rose-600/80 ring-1 ring-rose-600/40'
-                      : isSelected
-                      ? 'bg-neutral-800/80 border-neutral-700'
-                      : 'bg-neutral-950/60 border-neutral-800/80 hover:bg-neutral-800/50'
-                  }`}
+                  data-active={isCurrentActive}
+                  className="a-songs__row"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-neutral-800">
-                      <Image
-                        src={song.albumCover}
-                        alt={song.title}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/30 hover:bg-black/50 flex items-center justify-center text-white transition">
-                        {isCurrentActive && isPlaying ? (
-                          <Pause size={14} />
-                        ) : (
-                          <Play size={14} />
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="min-w-0">
-                      <h4 className="text-xs font-medium text-white truncate">
-                        {song.title}
-                      </h4>
-                      <p className="text-[11px] text-neutral-400 truncate">
+                  <div className="a-song__info">
+                    <span className="a-cover">
+                      <Image src={song.albumCover} alt="" fill sizes="40px" />
+                      {isCurrentActive && isPlaying && (
+                        <span aria-hidden="true">
+                          <Pause size={14} strokeWidth={1.5} />
+                        </span>
+                      )}
+                    </span>
+                    <span className="a-cell-title">
+                      <b>{song.title}</b>
+                      <span>
                         {song.artist}
-                      </p>
-                    </div>
+                        {isSelected ? ', in use' : ''}
+                      </span>
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectActiveSong(song);
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                        isCurrentActive
-                          ? 'bg-rose-600 text-white'
-                          : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-700'
-                      }`}
-                    >
-                      {isCurrentActive ? 'Scrub Song' : 'Select'}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectActiveSong(song);
+                    }}
+                    aria-pressed={isCurrentActive}
+                    className={`a-btn a-btn--sm${isCurrentActive ? ' a-btn--primary' : ''}`}
+                  >
+                    {isCurrentActive ? 'Selected' : 'Select'}
+                  </button>
                 </div>
               );
             })
           ) : (
-            <div className="p-8 text-center text-xs text-neutral-500">
-              No songs found matching &quot;{query}&quot;. Try searching another artist or song name.
-            </div>
+            <p className="a-help">
+              No songs match “{query}”. Try another artist or song name.
+            </p>
           )}
         </div>
       </div>
     </div>
   );
 }
-

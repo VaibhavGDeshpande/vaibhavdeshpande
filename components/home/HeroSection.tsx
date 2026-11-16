@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { Photo } from '@/lib/data';
 import { getOptimizedImageUrl } from '@/lib/image';
@@ -21,53 +22,84 @@ export default function HeroSection({ desktopImages, mobileImages }: HeroSection
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const heroImages = isMobile ? mobileImages : desktopImages;
+  const heroImages = isMobile && mobileImages.length ? mobileImages : desktopImages;
 
   useEffect(() => {
-    if (!heroImages.length) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((i) => (i + 1) % heroImages.length);
-    }, 5200);
-
-    return () => clearInterval(interval);
-  }, [heroImages.length]);
+    setCurrentIndex(0);
+  }, [isMobile]);
 
   if (!heroImages.length) return null;
 
-  const currentPhoto = heroImages[currentIndex];
+  const active = Math.min(currentIndex, heroImages.length - 1);
+  const currentPhoto = heroImages[active];
 
   return (
-    <section className="relative -mt-20 h-[100svh] w-full overflow-hidden sm:-mt-24">
-      <div key={currentPhoto.id} className="absolute inset-0 transition-opacity duration-[900ms]">
-        <Image
-          src={getOptimizedImageUrl(currentPhoto.image_url, { width: 2400, quality: 76 })}
-          alt={currentPhoto.title}
-          fill
-          priority
-          className="object-cover transition-transform duration-[6000ms] scale-105"
-          sizes="100vw"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/15 to-black/85" />
-
-        <div className="section-wrap relative z-10 flex h-full items-end pb-16 sm:items-center sm:pb-0">
-          <div className="fade-up max-w-2xl">
-            <p className="eyebrow mb-4">Visual stories by Vaibhav Deshpande</p>
-            <h1 className="headline-serif text-4xl leading-[0.92] text-stone-100 sm:text-6xl md:text-8xl">
-              {currentPhoto.category}
-            </h1>
-            <p className="mt-4 text-xs uppercase tracking-[0.24em] text-stone-300 sm:text-sm">{currentPhoto.title}</p>
-          </div>
-        </div>
+    <section className="darkroom hero" aria-labelledby="hero-title">
+      <div className="hero__print" id="hero-print" aria-live="polite">
+        {heroImages.map((photo, i) => (
+          <Image
+            key={photo.id}
+            src={getOptimizedImageUrl(photo.image_url, { width: 2400, quality: 76 })}
+            alt={photo.title}
+            fill
+            priority={i === 0}
+            sizes="100vw"
+            className="hero__img"
+            data-active={i === active}
+            aria-hidden={i !== active}
+          />
+        ))}
       </div>
 
-      <button
-        onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
-        className="btn-soft absolute bottom-6 left-1/2 z-20 -translate-x-1/2 sm:bottom-10"
-      >
-        Explore
-      </button>
+      <div className="container hero__grid">
+        <div className="hero__text">
+          <h1 id="hero-title">Vaibhav Deshpande</h1>
+          <p className="lead hero__lede">
+            A Pune photographer of city streets, open skies and textured details.
+          </p>
+          <div className="hero__actions">
+            <Link href="/gallery" className="btn btn--primary">
+              Open the archive
+            </Link>
+            <a href="mailto:deshpande.vaibhav1012@gmail.com" className="btn">
+              Get in touch
+            </a>
+          </div>
+        </div>
+
+        <div className="hero__picker">
+          <ol
+            className="frames"
+            aria-label="Frames"
+            style={{ '--active': active, '--count': heroImages.length } as React.CSSProperties}
+          >
+            {heroImages.map((photo, i) => (
+              <li key={photo.id}>
+                <button
+                  type="button"
+                  className="frames__row"
+                  aria-pressed={i === active}
+                  aria-controls="hero-print"
+                  onClick={() => setCurrentIndex(i)}
+                  onMouseEnter={() => setCurrentIndex(i)}
+                  onFocus={() => setCurrentIndex(i)}
+                >
+                  <span className="frames__num num">{i + 1}</span>
+                  <span className="frames__name">{photo.category}</span>
+                  <span className="frames__title">{photo.title}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          <Link
+            key={currentPhoto.category}
+            href={`/gallery?filter=${currentPhoto.category}`}
+            className="link hero__more"
+          >
+            More from {currentPhoto.category}
+          </Link>
+        </div>
+      </div>
     </section>
   );
 }

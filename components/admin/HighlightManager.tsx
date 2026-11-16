@@ -2,21 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import {
-  Sparkles,
-  Plus,
-  Trash2,
-  Edit3,
-  Play,
-  Music,
-  CheckCircle2,
-  AlertCircle,
-  MapPin,
-  FileText,
-  Check,
-  Eye,
-  RefreshCw,
-} from 'lucide-react';
+import { Plus, CheckCircle2, AlertCircle, Check, Eye } from 'lucide-react';
 import supabase from '@/lib/supabase';
 import { useUser } from '@/lib/useUser';
 import type { Photo } from '@/lib/data';
@@ -104,8 +90,8 @@ export default function HighlightManager() {
 
   if (!user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-neutral-500">
-        Login required
+      <div className="a-wait">
+        Sign in to manage highlights.
       </div>
     );
   }
@@ -123,7 +109,7 @@ export default function HighlightManager() {
         imageUrl: photo.image_url,
         title: photo.title,
         caption: details.caption || photo.title,
-        location: details.location || '📍 Photography Portfolio',
+        location: details.location || 'Photography portfolio',
         date: details.date || 'Recent',
       };
     });
@@ -142,7 +128,7 @@ export default function HighlightManager() {
           imageUrl: finalCover,
           title: title || 'Story Slide',
           caption: 'Photography story highlight',
-          location: '📍 Pune, India',
+          location: 'Pune, India',
         }
       ],
     };
@@ -226,389 +212,322 @@ export default function HighlightManager() {
 
     setStatusMessage({
       type: 'success',
-      text: `Successfully published "${highlightToSave.title}" to the home page 🎉`,
+      text: `Published “${highlightToSave.title}” to the home page.`,
     });
 
     setIsEditing(false);
   };
 
+  const formatSnippet = (song: SongTrack) => {
+    if (typeof song.startTime !== 'number') return null;
+    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+    const end = song.endTime ?? song.startTime + 15;
+    return `0:${pad(song.startTime)} to 0:${pad(end)}`;
+  };
+
+  const slideCategories = Array.from(new Set(photos.map((p) => p.category).filter(Boolean)));
+  const slidePhotos = photos.filter((photo) => {
+    const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
+    const matchesSearch = !photoSearch || photo.title.toLowerCase().includes(photoSearch.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
   return (
-    <section className="pt-28 pb-16 px-6 md:px-12 bg-neutral-950 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-10">
-        {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-serif text-neutral-200 flex items-center gap-3">
-              <Sparkles className="text-amber-400" />
-              Instagram Story Highlights Manager
-            </h1>
-            <p className="text-sm text-neutral-500 mt-2">
-              Create and edit story highlights with custom photos, captions, location badges, and 30-second music tracks.
-            </p>
-          </div>
+    <section className="a-page" aria-labelledby="highlights-title">
+      <header className="a-head">
+        <div>
+          <h1 id="highlights-title">Highlights</h1>
+          <p>Stories with music, shown under the hero on the home page.</p>
+        </div>
+        {!isEditing && (
+          <button type="button" onClick={handleOpenCreateForm} className="a-btn a-btn--primary">
+            <Plus size={16} strokeWidth={1.5} aria-hidden="true" />
+            New highlight
+          </button>
+        )}
+      </header>
 
-          {!isEditing && (
-            <button
-              onClick={handleOpenCreateForm}
-              className="inline-flex items-center gap-2 px-5 py-3 bg-white text-black text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-neutral-200 transition"
-            >
-              <Plus size={16} />
-              New Highlight
-            </button>
+      {statusMessage && (
+        <div role="status" className={`a-status a-status--${statusMessage.type}`}>
+          {statusMessage.type === 'success' ? (
+            <CheckCircle2 size={16} strokeWidth={1.5} aria-hidden="true" />
+          ) : (
+            <AlertCircle size={16} strokeWidth={1.5} aria-hidden="true" />
           )}
+          <span className="a-status__text">{statusMessage.text}</span>
         </div>
+      )}
 
-        {/* STATUS MESSAGE */}
-        {statusMessage && (
-          <div
-            className={`p-4 rounded-xl border flex items-start gap-3 text-sm ${
-              statusMessage.type === 'success'
-                ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-                : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
-            }`}
-          >
-            {statusMessage.type === 'success' ? (
-              <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400 mt-0.5" />
-            ) : (
-              <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
-            )}
-            <div>{statusMessage.text}</div>
+      {/* EDITOR */}
+      {isEditing && (
+        <div className="a-editor" aria-labelledby="editor-title">
+          <div className="a-editor__head">
+            <h2 id="editor-title">{editingId ? 'Edit highlight' : 'New highlight'}</h2>
+            <button type="button" onClick={() => setIsEditing(false)} className="a-btn a-btn--sm">
+              Cancel
+            </button>
           </div>
-        )}
 
-        {/* HIGHLIGHT CREATOR FORM */}
-        {isEditing && (
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 md:p-8 space-y-8 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-              <h3 className="text-lg font-medium text-white">
-                {editingId ? 'Edit Highlight' : 'Create New Highlight'}
-              </h3>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setPreviewHighlight(buildCurrentHighlight())}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-medium hover:bg-amber-500/30 transition"
-                >
-                  <Eye size={14} />
-                  Live Preview Story
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="text-xs text-neutral-400 hover:text-white transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+          <div className="a-split">
+            <div className="a-stack">
+              <label className="a-field">
+                <span className="a-label">Title</span>
+                <input
+                  type="text"
+                  className="a-input"
+                  placeholder="e.g. Pune vibes, Golden hour"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </label>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* LEFT: TITLE & MUSIC */}
-              <div className="space-y-6">
-                {/* TITLE */}
-                <label className="block">
-                  <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
-                    Highlight Title
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="e.g. Pune Vibes 🌆, Golden Hour 🌅"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="mt-2 w-full p-3 bg-neutral-950 border border-neutral-800 rounded-xl text-white text-sm placeholder-neutral-600 focus:outline-none focus:border-neutral-600"
-                  />
-                </label>
-
-                {/* MUSIC SELECTION PILL & MODAL TRIGGER */}
-                <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium flex items-center gap-1.5">
-                    <Music size={14} className="text-rose-400" />
-                    Background Music Track
-                  </span>
-                  <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-neutral-800">
-                        <Image
-                          src={selectedSong.albumCover}
-                          alt={selectedSong.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-medium text-white truncate flex items-center gap-2">
-                          <span>{selectedSong.title}</span>
-                          {typeof selectedSong.startTime === 'number' && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-rose-950 text-rose-300 border border-rose-800 rounded font-mono">
-                              0:{selectedSong.startTime < 10 ? `0${selectedSong.startTime}` : selectedSong.startTime} ➔ 0:{selectedSong.endTime ? (selectedSong.endTime < 10 ? `0${selectedSong.endTime}` : selectedSong.endTime) : (selectedSong.startTime + 15)}
-                            </span>
-                          )}
-                        </h4>
-                        <p className="text-[11px] text-neutral-400 truncate">
-                          {selectedSong.artist}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setIsMusicModalOpen(true)}
-                      className="px-3.5 py-2 bg-rose-600/20 text-rose-300 border border-rose-600/40 rounded-lg text-xs font-medium hover:bg-rose-600/30 transition shrink-0"
-                    >
-                      Search & Scrub Song
-                    </button>
+              <div className="a-field">
+                <span className="a-label">Music</span>
+                <div className="a-song">
+                  <div className="a-song__info">
+                    <span className="a-thumb">
+                      <Image src={selectedSong.albumCover} alt="" fill sizes="44px" />
+                    </span>
+                    <span className="a-cell-title">
+                      <b>{selectedSong.title}</b>
+                      <span>
+                        {selectedSong.artist}
+                        {formatSnippet(selectedSong) ? `, ${formatSnippet(selectedSong)}` : ''}
+                      </span>
+                    </span>
                   </div>
-                </div>
-
-                {/* COVER PHOTO SELECTION */}
-                <div className="space-y-2">
-                  <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
-                    Cover Photo (Avatar)
-                  </span>
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-44 overflow-y-auto p-2 bg-neutral-950 rounded-xl border border-neutral-800">
-                    {photos.map((photo) => (
-                      <button
-                        key={`cover-${photo.id}`}
-                        onClick={() => setCoverImage(photo.image_url)}
-                        className={`relative aspect-square rounded-lg overflow-hidden border-2 transition ${
-                          coverImage === photo.image_url
-                            ? 'border-amber-400 scale-95'
-                            : 'border-transparent opacity-60 hover:opacity-100'
-                        }`}
-                      >
-                        <Image
-                          src={getOptimizedImageUrl(photo.image_url, { width: 150, quality: 60 })}
-                          alt={photo.title}
-                          fill
-                          sizes="80px"
-                          className="object-cover"
-                        />
-                        {coverImage === photo.image_url && (
-                          <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center">
-                            <Check size={16} className="text-amber-400" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* RIGHT: STORY SLIDES PHOTO SELECTOR */}
-              <div className="space-y-3">
-                <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium flex items-center justify-between">
-                  <span>Select Story Slides ({selectedPhotoIds.length})</span>
-                  <span className="text-[11px] text-neutral-500 font-normal">Click to toggle</span>
-                </span>
-
-                {/* SEARCH & CATEGORY FILTER BAR FOR SLIDE SELECTOR */}
-                <div className="flex gap-2 text-xs">
-                  <input
-                    type="text"
-                    placeholder="Search photos..."
-                    value={photoSearch}
-                    onChange={(e) => setPhotoSearch(e.target.value)}
-                    className="flex-1 p-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:outline-none"
-                  />
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="p-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white focus:outline-none"
-                  >
-                    <option value="All">All Categories</option>
-                    {Array.from(new Set(photos.map((p) => p.category).filter(Boolean))).map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 max-h-[350px] overflow-y-auto p-3 bg-neutral-950 rounded-xl border border-neutral-800">
-                  {photos
-                    .filter((photo) => {
-                      const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
-                      const matchesSearch = !photoSearch || photo.title.toLowerCase().includes(photoSearch.toLowerCase());
-                      return matchesCategory && matchesSearch;
-                    })
-                    .map((photo) => {
-                      const isSelected = selectedPhotoIds.includes(photo.id);
-                      return (
-                        <div
-                          key={`slide-${photo.id}`}
-                          onClick={() => handleTogglePhotoSelection(photo.id)}
-                          className={`relative aspect-[4/5] rounded-xl overflow-hidden cursor-pointer border-2 transition ${
-                            isSelected
-                              ? 'border-rose-500 ring-2 ring-rose-500/30'
-                              : 'border-neutral-800 opacity-60 hover:opacity-100'
-                          }`}
-                        >
-                          <Image
-                            src={getOptimizedImageUrl(photo.image_url, { width: 250, quality: 60 })}
-                            alt={photo.title}
-                            fill
-                            sizes="150px"
-                            className="object-cover"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 p-1.5 bg-black/60 text-[10px] text-white truncate">
-                            {photo.title}
-                          </div>
-                          {isSelected && (
-                            <div className="absolute top-2 right-2 bg-rose-600 text-white rounded-full p-1 shadow">
-                              <Check size={12} />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </div>
-
-            {/* SLIDE CAPTIONS & LOCATION EDITING */}
-            {selectedPhotoIds.length > 0 && (
-              <div className="space-y-4 border-t border-neutral-800 pt-6">
-                <h4 className="text-xs uppercase tracking-widest text-neutral-400 font-medium">
-                  Story Slide Captions & Location Tags
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {photos
-                    .filter((p) => selectedPhotoIds.includes(p.id))
-                    .map((photo) => {
-                      const detail = slideDetails[photo.id] || { caption: photo.title, location: '📍 Pune, India', date: 'Recent' };
-                      return (
-                        <div
-                          key={`detail-${photo.id}`}
-                          className="p-3.5 bg-neutral-950 border border-neutral-800 rounded-xl flex gap-3"
-                        >
-                          <div className="relative w-16 h-20 rounded-lg overflow-hidden shrink-0">
-                            <Image
-                              src={getOptimizedImageUrl(photo.image_url, { width: 200, quality: 60 })}
-                              alt={photo.title}
-                              fill
-                              sizes="80px"
-                              className="object-cover"
-                            />
-                          </div>
-
-                          <div className="flex-1 space-y-2 text-xs">
-                            <input
-                              type="text"
-                              placeholder="Story Caption"
-                              value={detail.caption}
-                              onChange={(e) =>
-                                setSlideDetails((prev) => ({
-                                  ...prev,
-                                  [photo.id]: { ...detail, caption: e.target.value },
-                                }))
-                              }
-                              className="w-full p-2 bg-neutral-900 border border-neutral-800 rounded text-white text-xs placeholder-neutral-600 focus:outline-none"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Location (e.g. 📍 Pune, India)"
-                              value={detail.location}
-                              onChange={(e) =>
-                                setSlideDetails((prev) => ({
-                                  ...prev,
-                                  [photo.id]: { ...detail, location: e.target.value },
-                                }))
-                              }
-                              className="w-full p-2 bg-neutral-900 border border-neutral-800 rounded text-white text-xs placeholder-neutral-600 focus:outline-none"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
-
-            {/* ACTION BUTTONS */}
-            <div className="flex items-center justify-end gap-4 border-t border-neutral-800 pt-6">
-              <button
-                onClick={() => setPreviewHighlight(buildCurrentHighlight())}
-                className="px-5 py-3 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-amber-500/30 transition flex items-center gap-2"
-              >
-                <Eye size={15} />
-                Live Preview Story
-              </button>
-
-              <button
-                onClick={handleSaveHighlight}
-                className="px-6 py-3 bg-white text-black text-xs font-semibold uppercase tracking-widest rounded-xl hover:bg-neutral-200 transition"
-              >
-                Publish Highlight
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* EXISTING HIGHLIGHTS LIST */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-medium text-white flex items-center gap-2">
-            Active Highlights on Home Page ({highlights.length})
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {highlights.map((highlight) => (
-              <div
-                key={highlight.id}
-                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4 group hover:border-neutral-700 transition"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="relative p-[2px] rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0">
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden bg-neutral-950">
-                      <Image
-                        src={getOptimizedImageUrl(highlight.coverImage, { width: 150, quality: 60 })}
-                        alt={highlight.title}
-                        fill
-                        sizes="60px"
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-medium text-white truncate text-sm">
-                      {highlight.title}
-                    </h3>
-                    <p className="text-xs text-neutral-400 mt-0.5 truncate">
-                      🎵 {highlight.song?.title || 'Song Track'}
-                    </p>
-                    <p className="text-[11px] text-neutral-500 mt-0.5">
-                      {highlight.slides?.length || 0} story slides
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-neutral-800/80">
-                  <button
-                    onClick={() => setPreviewHighlight(highlight)}
-                    className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 transition"
-                  >
-                    <Eye size={13} /> Preview
+                  <button type="button" onClick={() => setIsMusicModalOpen(true)} className="a-btn a-btn--sm">
+                    Choose song
                   </button>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEditHighlight(highlight)}
-                      className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
-                    >
-                      <Edit3 size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteHighlight(highlight.id)}
-                      className="p-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
                 </div>
               </div>
-            ))}
+
+              <div className="a-field">
+                <span className="a-label" id="cover-label">Cover photo</span>
+                <div className="a-picker" role="group" aria-labelledby="cover-label">
+                  {photos.map((photo) => (
+                    <button
+                      type="button"
+                      key={`cover-${photo.id}`}
+                      onClick={() => setCoverImage(photo.image_url)}
+                      aria-pressed={coverImage === photo.image_url}
+                      aria-label={`Use ${photo.title} as the cover`}
+                      className="a-pick"
+                    >
+                      <Image
+                        src={getOptimizedImageUrl(photo.image_url, { width: 150, quality: 60 })}
+                        alt=""
+                        fill
+                        sizes="80px"
+                      />
+                      {coverImage === photo.image_url && (
+                        <span className="a-pick__check" aria-hidden="true">
+                          <Check size={14} strokeWidth={2} />
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="a-stack">
+              <div className="a-section__head" style={{ marginBottom: 0 }}>
+                <span className="a-label" id="slides-label">Story slides</span>
+                <span className="a-help">{selectedPhotoIds.length} selected</span>
+              </div>
+
+              <div className="a-row">
+                <label className="visually-hidden" htmlFor="slide-search">Search photos</label>
+                <input
+                  id="slide-search"
+                  type="search"
+                  className="a-input"
+                  placeholder="Search photos"
+                  value={photoSearch}
+                  onChange={(e) => setPhotoSearch(e.target.value)}
+                />
+                <label className="visually-hidden" htmlFor="slide-collection">Collection</label>
+                <select
+                  id="slide-collection"
+                  className="a-input"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="All">All collections</option>
+                  {slideCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="a-picker a-picker--slides" role="group" aria-labelledby="slides-label">
+                {slidePhotos.map((photo) => {
+                  const isSelected = selectedPhotoIds.includes(photo.id);
+                  return (
+                    <button
+                      type="button"
+                      key={`slide-${photo.id}`}
+                      onClick={() => handleTogglePhotoSelection(photo.id)}
+                      aria-pressed={isSelected}
+                      className="a-pick"
+                    >
+                      <Image
+                        src={getOptimizedImageUrl(photo.image_url, { width: 250, quality: 60 })}
+                        alt=""
+                        fill
+                        sizes="150px"
+                      />
+                      <span className="a-pick__name">{photo.title}</span>
+                      {isSelected && (
+                        <span className="a-pick__check" aria-hidden="true">
+                          <Check size={14} strokeWidth={2} />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                {!slidePhotos.length && <p className="a-help">No photographs match this search.</p>}
+              </div>
+            </div>
+          </div>
+
+          {selectedPhotoIds.length > 0 && (
+            <div className="a-section">
+              <h3 className="a-label">Captions and places</h3>
+              <div className="a-slides" style={{ marginTop: 'var(--space-sm)' }}>
+                {photos
+                  .filter((p) => selectedPhotoIds.includes(p.id))
+                  .map((photo) => {
+                    const detail = slideDetails[photo.id] || { caption: photo.title, location: 'Pune, India', date: 'Recent' };
+                    return (
+                      <div key={`detail-${photo.id}`} className="a-slide">
+                        <span className="a-thumb">
+                          <Image
+                            src={getOptimizedImageUrl(photo.image_url, { width: 200, quality: 60 })}
+                            alt=""
+                            fill
+                            sizes="56px"
+                          />
+                        </span>
+                        <div className="a-stack">
+                          <input
+                            type="text"
+                            className="a-input"
+                            aria-label={`Caption for ${photo.title}`}
+                            placeholder="Caption"
+                            value={detail.caption}
+                            onChange={(e) =>
+                              setSlideDetails((prev) => ({
+                                ...prev,
+                                [photo.id]: { ...detail, caption: e.target.value },
+                              }))
+                            }
+                          />
+                          <input
+                            type="text"
+                            className="a-input"
+                            aria-label={`Place for ${photo.title}`}
+                            placeholder="Place, e.g. Pune, India"
+                            value={detail.location}
+                            onChange={(e) =>
+                              setSlideDetails((prev) => ({
+                                ...prev,
+                                [photo.id]: { ...detail, location: e.target.value },
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          <div className="a-editor__foot">
+            <button type="button" onClick={() => setPreviewHighlight(buildCurrentHighlight())} className="a-btn">
+              <Eye size={16} strokeWidth={1.5} aria-hidden="true" />
+              Preview story
+            </button>
+            <button type="button" onClick={handleSaveHighlight} className="a-btn a-btn--primary">
+              Publish highlight
+            </button>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* MUSIC PICKER MODAL */}
+      {/* ON THE HOME PAGE NOW */}
+      <section aria-labelledby="live-title">
+        <div className="a-section__head">
+          <h2 id="live-title">On the home page</h2>
+          <span className="a-help">{highlights.length} highlights</span>
+        </div>
+
+        {loading ? (
+          <p className="a-help" role="status">Loading highlights…</p>
+        ) : highlights.length ? (
+          <table className="a-table a-table--stack">
+            <thead>
+              <tr>
+                <th scope="col">Highlight</th>
+                <th scope="col">Song</th>
+                <th scope="col" className="a-num">Slides</th>
+                <th scope="col" className="a-actions">
+                  <span className="visually-hidden">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {highlights.map((highlight) => (
+                <tr key={highlight.id} data-active={editingId === highlight.id && isEditing}>
+                  <td>
+                    <div className="a-cell-photo">
+                      <span className="a-thumb a-thumb--sq">
+                        <Image
+                          src={getOptimizedImageUrl(highlight.coverImage, { width: 150, quality: 60 })}
+                          alt=""
+                          fill
+                          sizes="48px"
+                        />
+                      </span>
+                      <span className="a-cell-title">
+                        <b>{highlight.title}</b>
+                      </span>
+                    </div>
+                  </td>
+                  <td data-label="Song">{highlight.song?.title || 'No song'}</td>
+                  <td data-label="Slides" className="a-num">{highlight.slides?.length || 0}</td>
+                  <td className="a-actions">
+                    <button type="button" onClick={() => setPreviewHighlight(highlight)} className="a-btn a-btn--sm">
+                      Preview
+                    </button>
+                    <button type="button" onClick={() => handleEditHighlight(highlight)} className="a-btn a-btn--sm">
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteHighlight(highlight.id)}
+                      aria-label={`Delete ${highlight.title}`}
+                      className="a-btn a-btn--sm a-btn--danger"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="a-empty">
+            <p>No highlights on the home page yet.</p>
+            <p>Make one with New highlight; it appears under the hero.</p>
+          </div>
+        )}
+      </section>
+
       <MusicPickerModal
         isOpen={isMusicModalOpen}
         onClose={() => setIsMusicModalOpen(false)}
@@ -616,7 +535,6 @@ export default function HighlightManager() {
         selectedSongId={selectedSong.id}
       />
 
-      {/* LIVE STORY PREVIEW MODAL */}
       {previewHighlight && (
         <StoryViewerModal
           highlights={[previewHighlight]}

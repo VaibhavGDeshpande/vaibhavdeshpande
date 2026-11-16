@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Manrope, Cormorant_Garamond } from 'next/font/google';
+import { Manrope, Cormorant_Garamond, Sofia_Sans_Extra_Condensed, Barlow } from 'next/font/google';
 import './globals.css';
 
 const sans = Manrope({ subsets: ['latin'], variable: '--font-sans' });
@@ -7,6 +7,18 @@ const serif = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-serif',
+});
+const drDisplay = Sofia_Sans_Extra_Condensed({
+  subsets: ['latin'],
+  weight: ['200', '400'],
+  variable: '--font-dr-display',
+  display: 'swap',
+});
+const drBody = Barlow({
+  subsets: ['latin'],
+  weight: ['300', '400'],
+  variable: '--font-dr-body',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -50,7 +62,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+    <html
+      lang="en"
+      className={`${sans.variable} ${serif.variable} ${drDisplay.variable} ${drBody.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Marks that scripts run, so CSS can hide things only when JS can show them again */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body className="antialiased">
         <main className="site-frame min-h-screen">{children}</main>
       </body>

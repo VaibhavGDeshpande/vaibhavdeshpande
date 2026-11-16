@@ -21,15 +21,11 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-neutral-500">
-        Checking authentication…
+      <div className="a-wait" role="status">
+        Checking your sign-in…
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-neutral-950 p-12 text-white">
-      <UploadImage />
-    </div>
-  );
+  return <UploadImage />;
 }

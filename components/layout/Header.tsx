@@ -10,41 +10,49 @@ export default function Header() {
   const navLinks = [
     { name: 'Work', href: '/gallery' },
     { name: 'About', href: '/#about' },
-    {name: 'Camera', href: '/camera'}
+    { name: 'Camera', href: '/camera' },
   ];
 
+  const isActive = (href: string) =>
+    pathname === href || (href === '/gallery' && pathname.startsWith('/gallery'));
+
+  const renderLink = (link: { name: string; href: string }) => (
+    <Link
+      key={link.name}
+      href={link.href}
+      className="mast__link"
+      aria-current={isActive(link.href) ? 'page' : undefined}
+    >
+      {link.name}
+    </Link>
+  );
+
   return (
-    <header className="relative z-40 px-3 py-3 sm:px-6 sm:py-4">
-      <div className="glass-panel mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-full px-3 shadow-2xl shadow-black/20 sm:px-5">
-        <Link href="/" className="relative flex shrink-0 items-center">
+    <header className="darkroom mast">
+      <a className="skip" href="#main">
+        Skip to content
+      </a>
+      <div className="container mast__bar">
+        <nav className="mast__side" aria-label="Primary">
+          {navLinks.slice(0, 2).map(renderLink)}
+        </nav>
+
+        <Link href="/" className="mast__mark" aria-label="Vaibhav Deshpande, home">
           <Image
             src="/name1.png"
             alt="Vaibhav Deshpande"
             width={180}
             height={38}
             priority
-            className="h-auto w-auto max-w-[140px] sm:max-w-[180px]"
+            className="mast__logo"
           />
         </Link>
 
-        <nav className="flex items-center gap-3 sm:gap-8">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href || (link.href === '/gallery' && pathname.startsWith('/gallery'));
-
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`rounded-full px-3 py-2 text-[10px] uppercase tracking-[0.28em] transition sm:text-xs ${
-                  isActive
-                    ? 'bg-white/15 text-stone-100 ring-1 ring-white/35'
-                    : 'text-stone-300 hover:bg-white/10 hover:text-stone-100'
-                }`}
-              >
-                {link.name}
-              </Link>
-            );
-          })}
+        <nav className="mast__side mast__side--end" aria-label="More">
+          {navLinks.slice(2).map(renderLink)}
+          <a href="mailto:deshpande.vaibhav1012@gmail.com" className="mast__link">
+            Contact
+          </a>
         </nav>
       </div>
     </header>

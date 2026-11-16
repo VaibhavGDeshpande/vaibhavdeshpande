@@ -2,9 +2,10 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true, // Bypasses Vercel's 4MB limit for source images
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 86400,
+    // A custom loader instead of Vercel's optimizer (which rejected the large originals):
+    // lib/imageLoader.ts points each srcset width at a pre-made WebP copy in Supabase.
+    loader: 'custom',
+    loaderFile: './lib/imageLoader.ts',
     deviceSizes: [480, 640, 750, 828, 1080, 1200, 1920, 2560],
     remotePatterns: [
       {

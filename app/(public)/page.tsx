@@ -8,8 +8,8 @@ export default function HomePage() {
     <>
       <HeroSection />
       <HighlightsBar />
-      <AboutSection />
       <CollectionsPreview />
+      <AboutSection />
     </>
   );
 }

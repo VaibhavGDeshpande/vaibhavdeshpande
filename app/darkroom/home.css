@@ -1,0 +1,168 @@
+/* Hallmark · shape: Index-First (draw 297871 dealt Narrative Workflow; swapped, a portfolio has no process to stage) · genre: atmospheric · theme: Darkroom (deal 1/3, seed photographer-portfolio-pune-india-7814·d540d4ac·2026-11-16·r0) · redesign: full
+ * hero: Poster (by request, restoring the full-screen photograph) · nav: masthead · footer: statement with a contact sheet, a full-width wordmark and a colophon line · imagery: photographs, the photographer's own, natural colour · signature: the chosen frame fills the first screen; a three-row picker on the scrim changes it · darkroom: amber, photographs natural (the user's colour work stays in colour)
+ * axes: dark/display-condensed/chromatic-amber · posture: restrained · contrast: pass · fold: pass · job: hire · draw: 297871 · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: P, a portfolio argues little; the hero hands the slideshow to the visitor instead of rotating it */
+/* Hallmark · dropped onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })} · 66 names the hero's Explore scroll cue; the nav's About link still reaches #about */
+/* Hallmark · dropped the hero slideshow's setInterval · 18 names auto-rotation without a pause; the frames are now chosen from the index */
+/* Hallmark · reworded "Stories & Music Highlights" to "Stories, with music" · 67 named the tracked-caps label */
+/* Hallmark · reworded "Vaibhav" to "Vaibhav Deshpande" · the footer wordmark now spells the full name to run the container's width */
+/* Hallmark · dismissed kept · the same photographs now load as pre-made WebP copies under variants/, so their file names end in .webp; none was removed */
+/* Hallmark · reworded "Collections" to "Collections by subject" · craft § 6 asks a head to say what the visitor sees */
+/* Hallmark · waive 71 · each plate name is an h3 inside the caption under its own photograph · the name labels the plate above it, as a print's caption does */
+/* Hallmark · waive 83 · a portfolio of the photographer's own work, every picture his · the collections are the page's content and each plate links to its gallery */
+/* Hallmark · waive 39b · each story is a whole 3:4 cover button, not a bar control · the cover is the tap target that opens the story viewer */
+/* Hallmark · answered F16 · the scrollbar belongs to the html element the gallery and admin share; this redesign is scoped to .darkroom */
+@import url("./tokens.css");
+@import url("./base.css");
+
+/* ---------- controls ---------- */
+.darkroom .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs); min-height: 48px; padding: 0 var(--space-lg); border: var(--rule-hair) solid var(--color-ink); border-radius: 0; background: transparent; color: var(--color-ink); font: 400 var(--text-lg)/1 var(--font-display); text-transform: uppercase; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.darkroom .btn:hover { background: var(--color-paper-3); }
+.darkroom .btn:active { transform: translateY(1px); }
+.darkroom .btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.darkroom .btn:disabled, .darkroom .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.darkroom .btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-ink); }
+.darkroom .btn--primary:hover { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+.darkroom .link { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-rule); text-underline-offset: 0.2em; transition: text-decoration-color var(--dur-short) var(--ease-out); }
+.darkroom .link:hover { text-decoration-color: var(--color-accent); }
+.darkroom .link:active { color: var(--color-ink-2); }
+
+.darkroom .skip { position: absolute; left: var(--space-md); top: calc(-1 * var(--space-3xl)); z-index: var(--z-toast); padding: var(--space-xs) var(--space-md); background: var(--color-ink); color: var(--color-paper); }
+.darkroom .skip:focus-visible { top: var(--space-md); }
+
+/* the old site's fixed scanline overlay and wash paint above the page's stacking context; darkroom pages drop them */
+body:has(.darkroom)::before, .site-frame:has(.darkroom)::before { display: none; }
+
+/* ---------- masthead ---------- */
+.mast { position: relative; z-index: var(--z-sticky-nav); border-bottom: var(--rule-hair) solid var(--color-rule); }
+.mast__bar { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: var(--space-lg); min-height: 80px; }
+.mast__side { display: flex; align-items: center; gap: var(--space-xl); }
+.mast__side--end { justify-content: flex-end; }
+.mast__mark { display: block; width: 220px; height: 64px; overflow: hidden; }
+.mast__logo { width: 100%; height: 100%; object-fit: cover; }
+.mast__link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-md); color: var(--color-ink-2); text-decoration: none; white-space: nowrap; border-bottom: var(--rule-hair) solid transparent; transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out); }
+.mast__link:hover { color: var(--color-ink); border-bottom-color: var(--color-rule); }
+.mast__link:active { color: var(--color-muted); }
+.mast__link[aria-current="page"] { color: var(--color-ink); border-bottom-color: var(--color-accent); }
+
+/* ---------- hero: Poster, the chosen frame full screen ---------- */
+.hero { position: relative; isolation: isolate; display: flex; align-items: flex-end; min-height: calc(100svh - 80px); background: var(--color-paper-2); color: var(--color-ink); overflow: hidden; }
+.hero__print { position: absolute; inset: 0; z-index: 1; }
+/* changing frames: a slow crossfade, the incoming print settling from a slight zoom */
+.hero__img { object-fit: cover; transition: opacity 900ms var(--ease-in-out), transform 1600ms var(--ease-out); }
+/* hidden only once script runs (app/layout.tsx adds .js); without it the frames stack and one still shows */
+.js .hero__img[data-active="false"] { opacity: 0; transform: scale(1.05); }
+/* the scrim: the ground rising from the foot, behind the type only */
+.hero::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(to top, color-mix(in oklab, var(--color-paper) 88%, transparent) 0%, color-mix(in oklab, var(--color-paper) 55%, transparent) 38%, transparent 70%); }
+.hero__grid { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-3xl); align-items: end; padding-block: var(--space-3xl) var(--space-2xl); }
+.hero__text { display: flex; flex-direction: column; min-width: 0; }
+.hero h1 { max-width: 10ch; }
+.hero__lede { margin-top: var(--space-lg); color: var(--color-ink); }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xl); }
+.hero__picker { min-width: 0; }
+.hero__more { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--space-xs); font-size: var(--text-sm); animation: hero-caption-in var(--dur-long) var(--ease-out); }
+@keyframes hero-caption-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* one marker for the chosen row, sliding between rows (every row is one line, so one height) */
+.frames { position: relative; list-style: none; margin: 0; padding: 0; border-bottom: var(--rule-hair) solid var(--color-rule); }
+.frames::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(100% / var(--count, 3)); z-index: 0; pointer-events: none; background: color-mix(in oklab, var(--color-paper) 70%, transparent); box-shadow: inset 2px 0 0 var(--color-accent); transform: translateY(calc(var(--active, 0) * 100%)); transition: transform var(--dur-long) var(--ease-out); }
+.frames > li { position: relative; z-index: 1; }
+.frames__row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-md); width: 100%; height: 48px; padding: var(--space-xs) var(--space-sm); border: 0; border-top: var(--rule-hair) solid var(--color-rule); background: transparent; text-align: left; cursor: pointer; color: var(--color-ink-2); transition: color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
+.frames__row:hover { color: var(--color-ink); }
+.frames__row[aria-pressed="true"] { color: var(--color-ink); }
+.frames__row:active { color: var(--color-muted); }
+.frames__row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.frames__num { font-size: var(--text-sm); color: var(--color-ink-2); transition: color var(--dur-short) var(--ease-out); }
+.frames__row[aria-pressed="true"] .frames__num { color: var(--color-accent); }
+.frames__name { font: 400 var(--text-title)/1 var(--font-display); text-transform: uppercase; }
+.frames__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); color: var(--color-ink-2); text-align: right; }
+
+/* ---------- stories: a grained well with a rail of covers ---------- */
+.stories { position: relative; isolation: isolate; padding-block: var(--section-gap-s); background: var(--color-paper-2); }
+.stories::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: var(--grain); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 9 -4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 200px 200px; }
+.stories__head { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: end; gap: var(--gap-columns); margin-bottom: var(--space-2xl); }
+.stories__line { color: var(--color-ink-2); justify-self: end; }
+.stories__rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(14rem, calc((100% - 3 * var(--gap-columns)) / 4)); gap: var(--gap-columns); margin: 0; padding: 0 0 var(--space-sm); list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; }
+.stories__rail > li { scroll-snap-align: start; min-width: 0; }
+.stories__rail:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.story { display: block; width: 100%; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; transition: transform var(--dur-micro) var(--ease-out); }
+.story:active { transform: translateY(1px); }
+.story:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.story__frame { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: var(--color-paper-3); }
+.story__img { object-fit: cover; }
+.story__caption { display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); margin-top: var(--space-sm); color: var(--color-ink); }
+.story__title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color var(--dur-short) var(--ease-out); }
+.story:hover .story__title { color: var(--color-accent); }
+.story__icon { flex-shrink: 0; color: var(--color-muted); }
+
+/* ---------- collections: one plate size, three across ---------- */
+.work { padding-block: var(--section-gap) var(--section-gap-s); }
+.work__head { display: flex; justify-content: space-between; align-items: end; gap: var(--space-lg); margin-bottom: var(--space-2xl); }
+.plates { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-2xl) var(--gap-columns); margin: 0; padding: 0; list-style: none; }
+.plate { grid-column: span 4; min-width: 0; }
+.plate__link { display: block; text-decoration: none; }
+.plate__link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.plate__link:active .plate__name { color: var(--color-ink-2); }
+.plate__frame { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-paper-2); }
+.plate__img { object-fit: cover; }
+.plate__caption { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-md); margin-top: var(--space-sm); }
+.plate__num { font-size: var(--text-sm); color: var(--color-muted); transition: color var(--dur-short) var(--ease-out); }
+.plate__link:hover .plate__num { color: var(--color-accent); }
+.darkroom .plate__name { font-size: var(--text-title); font-weight: 400; }
+.plate__count { font-size: var(--text-sm); color: var(--color-muted); }
+
+/* ---------- about: the bio beside a collector's sheet ---------- */
+.about { padding-block: var(--section-gap) var(--section-gap-l); border-top: var(--rule-hair) solid var(--color-rule); }
+.about__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gap-columns); align-items: end; }
+.about__text { grid-column: 1 / span 5; display: flex; flex-direction: column; gap: var(--space-md); color: var(--color-ink-2); }
+.about__text h2 { margin-bottom: var(--space-sm); color: var(--color-ink); }
+.about__lead { color: var(--color-ink); }
+.sheet { grid-column: 7 / -1; margin: 0; border-bottom: var(--rule-hair) solid var(--color-rule); }
+.sheet__row { display: grid; grid-template-columns: 10rem minmax(0, 1fr); align-items: baseline; gap: var(--space-lg); padding-block: var(--space-lg); border-top: var(--rule-hair) solid var(--color-rule); }
+.sheet dt { font-size: var(--text-sm); color: var(--color-muted); }
+.sheet dd { margin: 0; font: 400 var(--text-title)/1.1 var(--font-display); text-transform: uppercase; color: var(--color-ink); }
+
+/* ---------- footer: the close and a contact sheet, the full-width wordmark, a colophon line ---------- */
+.foot { padding-block: var(--section-gap-s) var(--space-xl); border-top: var(--rule-hair) solid var(--color-rule); }
+.foot .container { container-type: inline-size; }
+.foot__top { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--gap-columns); align-items: end; }
+.foot__statement { grid-column: 1 / span 6; font: 200 var(--text-display)/0.95 var(--font-display); text-transform: uppercase; letter-spacing: var(--tracking-display); }
+.foot__mail { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--color-rule); text-decoration-thickness: 2px; text-underline-offset: 0.12em; transition: text-decoration-color var(--dur-short) var(--ease-out); }
+.foot__mail:hover { text-decoration-color: var(--color-accent); }
+.foot__mail:active { color: var(--color-ink-2); }
+.foot__sheet { grid-column: 7 / -1; margin: 0; border-bottom: var(--rule-hair) solid var(--color-rule); }
+.foot__row { display: grid; grid-template-columns: 7rem minmax(0, 1fr); align-items: baseline; gap: var(--space-lg); padding-block: var(--space-sm); border-top: var(--rule-hair) solid var(--color-rule); }
+.foot__row dt { font-size: var(--text-sm); color: var(--color-muted); }
+.foot__row dd { margin: 0; min-width: 0; }
+.foot__links { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-lg); }
+.foot__sheet .link { display: inline-flex; align-items: center; min-height: 44px; white-space: nowrap; }
+/* the wordmark runs the container's full width at every size */
+.darkroom .foot__word { max-width: none; margin-top: var(--space-3xl); font-size: 18cqi; line-height: 0.85; white-space: nowrap; color: var(--color-ink-2); text-wrap: nowrap; }
+.foot__base { display: flex; justify-content: space-between; align-items: center; gap: var(--space-lg); margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: var(--rule-hair) solid var(--color-rule); }
+.foot__legal { font-size: var(--text-sm); color: var(--color-muted); }
+
+@media (max-width: 60rem) {
+  .hero__grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); padding-top: 40svh; }
+  .hero::after { background: linear-gradient(to top, color-mix(in oklab, var(--color-paper) 92%, transparent) 0%, color-mix(in oklab, var(--color-paper) 70%, transparent) 55%, transparent 85%); }
+  .stories__head { grid-template-columns: minmax(0, 1fr); }
+  .stories__line { justify-self: start; }
+  .plates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plate { grid-column: span 1; }
+  .about__grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xl); }
+  .about__text, .sheet { grid-column: 1 / -1; }
+  .foot__statement, .foot__sheet { grid-column: 1 / -1; }
+  .foot__top { row-gap: var(--space-2xl); }
+}
+@media (max-width: 40rem) {
+  .mast__bar { grid-template-columns: repeat(4, auto); justify-content: center; column-gap: var(--space-lg); row-gap: 0; padding-block: var(--space-xs); }
+  .mast__side { display: contents; }
+  .mast__mark { order: -1; grid-column: 1 / -1; justify-self: center; width: 180px; height: 52px; }
+  .work__head { flex-direction: column; align-items: start; }
+  .plates { grid-template-columns: minmax(0, 1fr); }
+  .sheet__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xs); }
+  .foot__base { flex-direction: column-reverse; align-items: flex-start; }
+  .foot__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xs); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__img, .frames::before, .frames__num, .frames__row, .mast__link, .darkroom .btn, .darkroom .link, .story, .story__title, .plate__num, .foot__mail { transition: none; }
+}

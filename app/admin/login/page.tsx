@@ -27,70 +27,67 @@ export default function LoginPage() {
       return;
     }
 
-    router.push('/admin/upload-image'); // 👈 redirect after login
+    router.push('/admin/dashboard');
     router.refresh();
   };
 
-  const handleSignup = async () => {
-    setLoading(true);
-    setError(null);
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
-    alert('Account created. You can now log in.');
-    setLoading(false);
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-white px-6">
-      <div className="w-full max-w-sm space-y-6">
-        <h1 className="text-3xl font-serif text-center">Admin Login</h1>
+    <div className="a-login">
+      <div className="a-login__side">
+        <p>Vaibhav, photography archive</p>
+        <h1>A home for the work behind the images.</h1>
+        <p>Portfolio administration</p>
+      </div>
+
+      <form
+        className="a-login__form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleLogin();
+        }}
+      >
+        <div>
+          <h2>Sign in</h2>
+          <p className="a-help">Continue to your photography archive.</p>
+        </div>
 
         {error && (
-          <p className="text-red-500 text-sm text-center">{error}</p>
+          <p role="alert" className="a-status a-status--error" style={{ marginBottom: 0 }}>
+            {error}
+          </p>
         )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 bg-neutral-900 border border-neutral-800 text-white"
-        />
+        <label className="a-field">
+          <span className="a-label">Email address</span>
+          <input
+            type="email"
+            name="email"
+            className="a-input"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 bg-neutral-900 border border-neutral-800 text-white"
-        />
+        <label className="a-field">
+          <span className="a-label">Password</span>
+          <input
+            type="password"
+            name="password"
+            className="a-input"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
 
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full py-3 bg-white text-black font-medium disabled:opacity-50"
-        >
-          {loading ? 'Signing in…' : 'Sign In'}
+        <button type="submit" disabled={loading} aria-busy={loading} className="a-btn a-btn--primary">
+          {loading ? 'Signing in…' : 'Sign in'}
         </button>
-
-        <button
-          onClick={handleSignup}
-          disabled={loading}
-          className="w-full py-3 border border-neutral-700 text-neutral-300 hover:text-white"
-        >
-          Create Account
-        </button>
-      </div>
+      </form>
     </div>
   );
 }

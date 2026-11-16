@@ -21,15 +21,11 @@ export default function HighlightsAdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center text-neutral-500 text-sm">
-        Checking authentication…
+      <div className="a-wait" role="status">
+        Checking your sign-in…
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-neutral-950 text-white">
-      <HighlightManager />
-    </div>
-  );
+  return <HighlightManager />;
 }

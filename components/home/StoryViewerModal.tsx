@@ -204,7 +204,7 @@ export default function StoryViewerModal({
   if (!currentHighlight || !currentSlide) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/92 backdrop-blur-xl">
       {currentHighlight.song?.youtubeId ? (
         <iframe
           className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
@@ -271,8 +271,8 @@ export default function StoryViewerModal({
                   className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden"
                 >
                   <div
-                    className="h-full bg-white transition-all duration-75 ease-linear"
-                    style={{ width: `${widthPercent}%` }}
+                    className="h-full w-full origin-left bg-white transition-transform duration-75 ease-linear motion-reduce:transition-none"
+                    style={{ transform: `scaleX(${widthPercent / 100})` }}
                   />
                 </div>
               );
@@ -316,7 +316,7 @@ export default function StoryViewerModal({
                 {isMuted || needsUserTapForAudio ? (
                   <>
                     <VolumeX size={15} className="text-rose-400" />
-                    <span className="text-[10px] font-semibold text-rose-300 pr-1">Tap for Music 🎵</span>
+                    <span className="text-[10px] font-semibold text-rose-300 pr-1">Tap for music</span>
                   </>
                 ) : (
                   <Volume2 size={15} className="text-emerald-400" />
